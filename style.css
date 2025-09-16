@@ -1,0 +1,139 @@
+:root {
+  --primary-color: #0080ff;
+  --secondary-color: #28a745;
+  --danger-color: #dc3545;
+}
+
+* {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.container {
+  background-color: #f0f0f0;
+}
+
+.box {
+  width: 100%;
+  background-color: #fff;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+@media(min-width: 768px) {
+  .container {
+    height: 90vh;
+  }
+
+  .box {
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 90%;
+    max-width: 600px;
+  }
+
+  .links a {
+    width: 25% !important;
+  }
+}
+
+.controls {
+  display: flex;
+  gap: 16px;
+}
+.controls .button {
+  width: 100%;
+}
+.button {
+  padding: 0.8rem 1.5rem;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.3;
+}
+
+#start-btn {
+  background-color: var(--secondary-color);
+}
+
+#stop-btn {
+  background-color: var(--danger-color);
+}
+
+#video-playback {
+  width: 100%;
+  max-width: 100%;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: none;
+}
+
+#history { overflow: hidden; display: ;: none; border: 1px solid var(--primary-color); border-radius: 10px; }
+#history li {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border-bottom: 1px solid var(--primary-color);
+  display: flex;
+}
+#history li:last-child { border-bottom: none; }
+#history li a {
+  width: 100%;
+  text-align: left;
+  padding: 12px;
+  text-decoration: none;
+  color: var(--primary-color);
+}
+#history li .del {
+  background-color: var(--danger-color);
+  border-radius: 0;
+  border: 0;
+}
+#history li .preview {
+  background-color: var(--secondary-color);
+  border-radius: 0;
+  border: 0;
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 3rem;
+  width: 90%;
+  max-width: 600px;
+}
+
+.links a {
+  cursor: pointer;
+  color: var(--primary-color);
+  padding: 0.7rem 1.5rem;
+  text-align: left;
+  border-radius: 5px;
+  text-decoration: none;
+  font-size: 12px;
+  width: 100%;
+  transition: all 0.2s ease;
+}
+
+.links a:hover {
+  background-color: var(--primary-color);
+  color: #fff;
+}
