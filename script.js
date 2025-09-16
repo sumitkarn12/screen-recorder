@@ -78,7 +78,6 @@ startBtn.addEventListener('click', async () => {
     stopBtn.disabled = false;
     showToast('Recording started...');
     videoPlayback.style.display = 'none';
-    downloadLink.style.display = 'none';
   } catch (err) {
     console.error("Error: " + err);
     showToast("Error: Could not start recording. Please ensure your browser supports the API and you are on a secure connection (HTTPS or localhost).");
