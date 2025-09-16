@@ -1,6 +1,5 @@
 const startBtn = document.getElementById('start-btn');
 const stopBtn = document.getElementById('stop-btn');
-const statusMessage = document.getElementById('status-message');
 const videoPlayback = document.getElementById('video-playback');
 const historyContainer = document.getElementById('history');
 
@@ -77,12 +76,12 @@ startBtn.addEventListener('click', async () => {
     // Update UI state
     startBtn.disabled = true;
     stopBtn.disabled = false;
-    statusMessage.textContent = 'Recording started...';
+    showToast('Recording started...');
     videoPlayback.style.display = 'none';
     downloadLink.style.display = 'none';
   } catch (err) {
     console.error("Error: " + err);
-    statusMessage.textContent = "Error: Could not start recording. Please ensure your browser supports the API and you are on a secure connection (HTTPS or localhost).";
+    showToast("Error: Could not start recording. Please ensure your browser supports the API and you are on a secure connection (HTTPS or localhost).");
     startBtn.disabled = false;
     stopBtn.disabled = true;
   }
