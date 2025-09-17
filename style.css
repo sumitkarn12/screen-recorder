@@ -1,9 +1,8 @@
 .controls { display: flex; gap: 16px; }
 .controls .button { width: 100%; }
 .button { padding: 0.8rem 1.5rem; color: var(--light-color); border: none;  border-radius: 5px; cursor: pointer; transition: all 0.3s; }
-.button:disabled { cursor: not-allowed; opacity: 0.3; }
-#start-btn { background-color: var(--primary-color); }
-#stop-btn { background-color: var(--secondary-color); }
+#start-btn, #pause-btn, #resume-btn, #stop-btn { background-color: var(--primary-color); }
+#pause-btn, #resume-btn, #stop-btn { display: none; }
 #video-playback { width: 100%; max-width: 100%; border-radius: 5px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); display: none; }
 #history { overflow: hidden; display: none; border: 1px solid var(--primary-color); border-radius: 10px; }
 #history li {
@@ -21,15 +20,11 @@
   text-decoration: none;
   color: var(--primary-color);
 }
-#history li .del {
-  background-color: var(--primary-color);
+#history li .del { background-color: var(--primary-color); }
+#history li .preview { background-color: var(--secondary-color); }
+#history li .del, #history li .preview {
   color: var(--light-color);
   border-radius: 0;
   border: 0;
-}
-#history li .preview {
-  background-color: var(--secondary-color);
-  color: var(--light-color);
-  border-radius: 0;
-  border: 0;
+  font-size: 32px;
 }

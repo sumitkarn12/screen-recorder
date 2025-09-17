@@ -9,7 +9,7 @@
 	<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" />
 	<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
-	<link rel="shortcut icon" href="https://age-calculator.idkey.in/favicon.svg" type="image/x-icon" />
+	<link rel="shortcut icon" href="https://age-calculator.idkey.in/favicon.svg" type="image/x-icon">
 	<link rel="stylesheet" href="https://age-calculator.idkey.in/core.css" />
 
 	<link rel="stylesheet" href="/style.css">
@@ -20,9 +20,12 @@
 	<div class="container center">
 		<div class="box">
 			<h2>Screen Recorder</h2>
+      <p id="msg"></p>
 			<div class="controls">
 				<button id="start-btn" class="button">Start Recording</button>
-				<button id="stop-btn" class="button" disabled>Stop Recording</button>
+				<button id="pause-btn" class="button">Pause</button>
+				<button id="resume-btn" class="button">Resume</button>
+				<button id="stop-btn" class="button">Stop</button>
 			</div>
 			<video id="video-playback" controls></video>
 			<ul id="history"></ul>

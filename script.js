@@ -1,5 +1,8 @@
 const startBtn = document.getElementById('start-btn');
+const pauseBtn = document.getElementById('pause-btn');
+const resumeBtn = document.getElementById('resume-btn');
 const stopBtn = document.getElementById('stop-btn');
+const msg = document.getElementById('msg');
 const videoPlayback = document.getElementById('video-playback');
 const historyContainer = document.getElementById('history');
 
@@ -48,7 +51,7 @@ startBtn.addEventListener('click', async () => {
 
     // When the recording stops, create a video Blob and a download link
     mediaRecorder.onstop = () => {
-      const blob = new Blob(recordedChunks, { type: 'video/webm' });
+      const blob = new Blob(recordedChunks, { type: mediaRecorder.mimeType });
       recordedChunks = [];
       const videoURL = URL.createObjectURL(blob);
 
@@ -66,29 +69,59 @@ startBtn.addEventListener('click', async () => {
 
       // Stop the media stream tracks
       stream.getTracks().forEach(track => track.stop());
-      startBtn.disabled = false;
-      stopBtn.disabled = true;
     };
 
     // Start the recording
     mediaRecorder.start();
 
+    startBtn.style.display = "none";
+    pauseBtn.style.display = "block";
+    resumeBtn.style.display = "none";
+    stopBtn.style.display = "block";
+
     // Update UI state
-    startBtn.disabled = true;
-    stopBtn.disabled = false;
     showToast('Recording started...');
     videoPlayback.style.display = 'none';
   } catch (err) {
     console.error("Error: " + err);
-    showToast("Error: Could not start recording. Please ensure your browser supports the API and you are on a secure connection (HTTPS or localhost).");
-    startBtn.disabled = false;
-    stopBtn.disabled = true;
+    showToast("Error: Could not start recording." );
+    startBtn.style.display = "blokc";
+    pauseBtn.style.display = "none";
+    resumeBtn.style.display = "none";
+    stopBtn.style.display = "none";
+  }
+});
+
+pauseBtn.addEventListener('click', () => {
+  if (mediaRecorder && mediaRecorder.state == 'recording') {
+    mediaRecorder.pause();
+    showToast("Paused");
+    startBtn.style.display = "none";
+    pauseBtn.style.display = "none";
+    resumeBtn.style.display = "block";
+    stopBtn.style.display = "block";
+  }
+});
+
+resumeBtn.addEventListener('click', () => {
+  if (mediaRecorder && mediaRecorder.state == 'paused') {
+    mediaRecorder.resume();
+    showToast("Resumed");
+    startBtn.style.display = "none";
+    pauseBtn.style.display = "block";
+    resumeBtn.style.display = "none";
+    stopBtn.style.display = "block";
   }
 });
 
 stopBtn.addEventListener('click', () => {
   if (mediaRecorder && mediaRecorder.state !== 'inactive') {
     mediaRecorder.stop();
+    showToast("Stopped");
+    startBtn.style.display = "block";
+    pauseBtn.style.display = "none";
+    resumeBtn.style.display = "none";
+    stopBtn.style.display = "none";
   }
 });
 
@@ -103,8 +136,10 @@ function renderHistory() {
     del.textContent = "X";
     del.addEventListener("click", async r => {
       r.preventDefault();
-      await db.recordings.delete( data.id );
-      renderHistory();
+      if ( confirm( "Are you sure to delete this?" ) ) {
+        await db.recordings.delete( data.id );
+        renderHistory();
+      }
     });
 
     a.href = URL.createObjectURL( data.blob );
@@ -134,3 +169,11 @@ function renderHistory() {
 }
 
 renderHistory();
+
+if ( !navigator.mediaDevices.getDisplayMedia ) {
+  document.querySelector(".controls").style.display = "none";
+  msg.style.display = "block";
+  msg.innerText = "Your browser does not support screen recording feature.";
+} else {
+  msg.style.display = "none";
+}
