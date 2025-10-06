@@ -29,6 +29,13 @@ let mediaRecorder;
 let recordedChunks = [];
 let stream;
 
+function updateControls( start_shown=1, pause_shown=0, resume_shown=0, stop_shown=0 ) {
+  startBtn.style.display = (start_shown)?"block":"none";
+  pauseBtn.style.display = (pause_shown) ? "block" : "none";
+  resumeBtn.style.display = (resume_shown) ? "block" : "none";
+  stopBtn.style.display = (stop_shown) ? "block" : "none";
+}
+
 startBtn.addEventListener('click', async () => {
   try {
     // Request access to the user's screen
@@ -55,7 +62,6 @@ startBtn.addEventListener('click', async () => {
       recordedChunks = [];
       const videoURL = URL.createObjectURL(blob);
 
-
       videoPlayback.src = videoURL;
       videoPlayback.style.display = 'block';
 
@@ -69,15 +75,15 @@ startBtn.addEventListener('click', async () => {
 
       // Stop the media stream tracks
       stream.getTracks().forEach(track => track.stop());
+
+      showToast("Stopped");
+      updateControls( 1,0,0,0 );
     };
 
     // Start the recording
     mediaRecorder.start();
 
-    startBtn.style.display = "none";
-    pauseBtn.style.display = "block";
-    resumeBtn.style.display = "none";
-    stopBtn.style.display = "block";
+    updateControls( 0, 1, 0, 1);
 
     // Update UI state
     showToast('Recording started...');
@@ -85,10 +91,7 @@ startBtn.addEventListener('click', async () => {
   } catch (err) {
     console.error("Error: " + err);
     showToast("Error: Could not start recording." );
-    startBtn.style.display = "blokc";
-    pauseBtn.style.display = "none";
-    resumeBtn.style.display = "none";
-    stopBtn.style.display = "none";
+    updateControls(1, 0, 0, 0);
   }
 });
 
@@ -96,10 +99,7 @@ pauseBtn.addEventListener('click', () => {
   if (mediaRecorder && mediaRecorder.state == 'recording') {
     mediaRecorder.pause();
     showToast("Paused");
-    startBtn.style.display = "none";
-    pauseBtn.style.display = "none";
-    resumeBtn.style.display = "block";
-    stopBtn.style.display = "block";
+    updateControls(0, 0, 1, 1);
   }
 });
 
@@ -107,28 +107,32 @@ resumeBtn.addEventListener('click', () => {
   if (mediaRecorder && mediaRecorder.state == 'paused') {
     mediaRecorder.resume();
     showToast("Resumed");
-    startBtn.style.display = "none";
-    pauseBtn.style.display = "block";
-    resumeBtn.style.display = "none";
-    stopBtn.style.display = "block";
+    updateControls(0, 1, 0, 1);
   }
 });
 
 stopBtn.addEventListener('click', () => {
   if (mediaRecorder && mediaRecorder.state !== 'inactive') {
     mediaRecorder.stop();
-    showToast("Stopped");
-    startBtn.style.display = "block";
-    pauseBtn.style.display = "none";
-    resumeBtn.style.display = "none";
-    stopBtn.style.display = "none";
   }
 });
 
 function renderHistory() {
   historyContainer.querySelectorAll("li").forEach( l => l.remove() );
 
+  let current_date = null;
+
   db.recordings.orderBy("at").reverse().each( data => {
+
+    if ( current_date != data.at.toDateString() ) {
+      current_date = data.at.toDateString();
+      let li = document.createElement("li");
+      li.style.padding = "12px";
+      li.style.fontWeight = "bold";
+      li.textContent = current_date;
+      historyContainer.appendChild(li);
+    }
+
     let li = document.createElement( "li" );
     let a = document.createElement( "a" );
     let del = document.createElement( "button" );

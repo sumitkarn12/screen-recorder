@@ -5,26 +5,9 @@
 #pause-btn, #resume-btn, #stop-btn { display: none; }
 #video-playback { width: 100%; max-width: 100%; border-radius: 5px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); display: none; }
 #history { overflow: hidden; display: none; border: 1px solid var(--primary-color); border-radius: 10px; }
-#history li {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  border-bottom: 1px solid var(--primary-color);
-  display: flex;
-}
+#history li {  list-style: none; padding: 0; margin: 0; border-bottom: 1px solid var(--primary-color); display: flex; }
 #history li:last-child { border-bottom: none; }
-#history li a {
-  width: 100%;
-  text-align: left;
-  padding: 12px;
-  text-decoration: none;
-  color: var(--primary-color);
-}
+#history li a { width: 100%; text-align: left; padding: 12px; text-decoration: none; color: var(--primary-color); }
 #history li .del { background-color: var(--primary-color); }
 #history li .preview { background-color: var(--secondary-color); }
-#history li .del, #history li .preview {
-  color: var(--light-color);
-  border-radius: 0;
-  border: 0;
-  font-size: 32px;
-}
+#history li .del, #history li .preview { color: var(--light-color); border-radius: 0; border: 0; font-size: 22px; }
