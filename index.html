@@ -20,25 +20,26 @@
 	<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
 	<link rel="shortcut icon" href="https://age-calculator.idkey.in/favicon.svg" type="image/x-icon">
-	<link rel="stylesheet" href="https://age-calculator.idkey.in/core.css" />
 
 	<link rel="stylesheet" href="/style.css">
 </head>
 
 <body>
 
-	<div class="container center">
+	<div class="container">
 		<div class="box">
-			<h2>Screen Recorder</h2>
+      <h1 class="title">Screen Recorder</h1>
 			<p id="msg"></p>
-			<div class="controls">
-				<button id="start-btn" class="button">Start Recording</button>
-				<button id="pause-btn" class="button">Pause</button>
-				<button id="resume-btn" class="button">Resume</button>
-				<button id="stop-btn" class="button">Stop</button>
-			</div>
-			<video id="video-playback" controls></video>
-			<ul id="history"></ul>
+      <video id="video-playback" controls></video>
+      <div class="controls">
+        <button id="start-btn" class="button">🎬 Start Recording</button>
+        <button id="pause-btn" class="button">⏸️ Pause</button>
+        <button id="resume-btn" class="button">▶️ Resume</button>
+        <button id="stop-btn" class="button">⏹️ Stop</button>
+      </div>
+      <div class="history-wrapper">
+        <ul id="history"></ul>
+      </div>
 		</div>
 	</div>
 

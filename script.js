@@ -25,6 +25,22 @@ function showToast(m, d = 5) {
   }).showToast();
 }
 
+async function estimateStorage() {
+  let details = "Storage Estimation API Not Supported";
+
+  if ('storage' in navigator && 'estimate' in navigator.storage) {
+    const { usage, quota } = await navigator.storage.estimate();
+    const percentUsed = (usage / quota * 100).toFixed(2);
+    const usageInMb = ((usage / (1024 * 1024))).toFixed(2);
+    const quotaInMb = ((quota / (1024 * 1024))).toFixed(2);
+
+    details = `${usageInMb} out of ${quotaInMb} MB used (${percentUsed}%)`;
+
+    return details
+  }
+}
+
+
 let mediaRecorder;
 let recordedChunks = [];
 let stream;
@@ -34,6 +50,14 @@ function updateControls( start_shown=1, pause_shown=0, resume_shown=0, stop_show
   pauseBtn.style.display = (pause_shown) ? "block" : "none";
   resumeBtn.style.display = (resume_shown) ? "block" : "none";
   stopBtn.style.display = (stop_shown) ? "block" : "none";
+}
+
+async function delRecording( data, liToRemove ) {
+  videoPlayback.src = null;
+  videoPlayback.style.display = 'none'
+
+  await db.recordings.delete(data.id);
+  renderHistory();
 }
 
 startBtn.addEventListener('click', async () => {
@@ -129,38 +153,80 @@ function renderHistory() {
       let li = document.createElement("li");
       li.style.padding = "12px";
       li.style.fontWeight = "bold";
-      li.textContent = current_date;
+      li.textContent = `🗓️ ${current_date}`;
       historyContainer.appendChild(li);
     }
 
     let li = document.createElement( "li" );
+    let recTitle = document.createElement( "h3" );
+    let timeEl = document.createElement( "p" );
+    let size = document.createElement( "p" );
     let a = document.createElement( "a" );
     let del = document.createElement( "button" );
+    let preview = document.createElement("button");
+    let rename = document.createElement("rename");
+
+    del.textContent = "❌";
+    a.textContent = `⬇️`;
+    preview.textContent = "👀";
+    rename.textContent = "✏️";
+
+    rename.classList.add( "rename", "button" );
+    preview.classList.add("preview", "button");
+    a.classList.add( "download", "button" );
     del.classList.add("del", "button");
-    del.textContent = "X";
+    recTitle.classList.add( "rec-title" );
+    size.classList.add( "size" );
+    timeEl.classList.add( "time" );
+
     del.addEventListener("click", async r => {
       r.preventDefault();
       if ( confirm( "Are you sure to delete this?" ) ) {
-        await db.recordings.delete( data.id );
-        renderHistory();
+        await delRecording( data, li );
       }
     });
 
     a.href = URL.createObjectURL( data.blob );
     a.download = data.title;
-    a.innerText = `${dateFormatter.format( data.at )}\n${(data.blob.size/1024).toFixed(2)}KB`;
+    let atAsTime = data.at.toLocaleTimeString('en-US', {
+      hour: "2-digit",
+      minute: "2-digit"
+    });
 
-    let preview = document.createElement("button");
-    preview.classList.add("preview", "button");
-    preview.textContent = "👀";
+    recTitle.textContent = `🎬 ${data.title}`;
+    timeEl.textContent = `🕣 ${atAsTime}`;
+    size.textContent = `📦 ${(data.blob.size / (1024 * 1024)).toFixed(2)}MB`;
+
     preview.addEventListener("click", async r => {
       r.preventDefault();
       videoPlayback.src = a.href;
+      videoPlayback.style.display = 'block';
+      window.scrollTo( 0, 0 );
     });
 
+    rename.addEventListener("click", async r => {
+      r.preventDefault();
+      let ts = data.title.split( "." );
+      let t = data.title.replace( "."+ts[ts.length-1], "" );
+      let p = prompt( "Enter new name", t );
+      if (p.trim().length == 0) {
+        showToast( "Title can't be empty." );
+      } else {
+        p = p.replaceAll( /\W/gi, "-" ).replaceAll(/-{2,}/gi, "-" );
+        p = p.substring( 0, 128 );
+        p = p + "." + ts[ts.length - 1];
+        await db.recordings.update(data.id, { title: p });
+        renderHistory();
+      }
+    });
+
+    li.appendChild( recTitle );
+    li.appendChild(timeEl );
+    li.appendChild( size );
+    li.appendChild( del );
+    li.appendChild( rename );
     li.appendChild( a );
     li.appendChild( preview );
-    li.appendChild( del );
     historyContainer.appendChild( li );
 
     if ( !videoPlayback.src ) {
@@ -176,8 +242,15 @@ renderHistory();
 
 if ( !navigator.mediaDevices.getDisplayMedia ) {
   document.querySelector(".controls").style.display = "none";
+  historyContainer.style.display = "none";
   msg.style.display = "block";
   msg.innerText = "Your browser does not support screen recording feature.";
 } else {
-  msg.style.display = "none";
+  historyContainer.style.display = "block";
+  setInterval( () => {
+    msg.style.display = "block";
+    estimateStorage().then( m => {
+      msg.textContent = m;
+    });
+  });
 }
