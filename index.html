@@ -6,55 +6,77 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 	<title>Free Online Screen Recorder | Record Your Screen & Audio</title>
-	<meta name="description" content="Our free online screen recorder is a simple and effective tool to capture your screen and audio.">
+	<meta name="description"
+		content="Our free online screen recorder is a simple and effective tool to capture your screen and audio.">
 	<meta property="og:title" content="Free Online Screen Recorder | Record Your Screen & Audio - IDKEY">
-	<meta property="og:description" content="Easily record your screen and microphone for free, right from your browser. Perfect for tutorials, presentations, and more.">
+	<meta property="og:description"
+		content="Easily record your screen and microphone for free, right from your browser. Perfect for tutorials, presentations, and more.">
 	<meta property="og:url" content="https://recorder.idkey.in/">
 	<meta property="og:type" content="website">
 
-<meta property="og:image"
-	content="https://og.tailgraph.com/og?title=Free%20Screen%20Recorder&text=Capture%20your%20screen%20and%20audio%20right%20from%20your%20browser%20with%20no%20duration%20limit.&bgUrl=https%3A%2F%2Fi.postimg.cc%2Fg0JRp60d%2Fscreen-recorder.jpg&titleFontFamily=Inter&bgTailwind=bg-no-repeat%20bg-cover&titleTailwind=text-6xl%20text-white%20font-black%20text-left%20px-16&textFontFamily=Josephine%20Sans&textTailwind=text-5xl%20text-white%20text-left%20px-16&overlay=1&containerTailwind=p-16" />
+	<meta property="og:image" content="https://record.idkey.in/banner.jpg" />
 
 	<script src="https://unpkg.com/dexie/dist/dexie.js"></script>
 	<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" />
 	<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
-	<link rel="shortcut icon" href="https://age-calculator.idkey.in/favicon.svg" type="image/x-icon">
+	<link rel="shortcut icon" href="https://record.idkey.in/logo.jpg" type="image/x-icon" />
 
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css" />
 	<link rel="stylesheet" href="/style.css">
 </head>
 
-<body>
+<body class="is-primary-light">
 
 	<div class="container">
-		<div class="box">
-      <h1 class="title">Screen Recorder</h1>
-			<p id="msg"></p>
-      <video id="video-playback" controls></video>
-      <div class="controls">
-        <button id="start-btn" class="button">🎬 Start Recording</button>
-        <button id="pause-btn" class="button">⏸️ Pause</button>
-        <button id="resume-btn" class="button">▶️ Resume</button>
-        <button id="stop-btn" class="button">⏹️ Stop</button>
-      </div>
-      <div class="history-wrapper">
-        <ul id="history"></ul>
-      </div>
-		</div>
+		<section class="hero">
+			<div class="hero-body">
+				<h1 class="title is-1">Record your screen</h1>
+				<p class="subtitle">Record your screen with no timelimit for free with audio.</p>
+        <article class="message mb-0">
+          <p class="message-body" id="msg">Loading available recording space...</p>
+        </article>
+        <div class="controls-wrapper">
+          <div class="controls">
+            <button id="start-btn" class="button is-primary is-rounded is-fullwidth is-large">🎬 Start recording</button>
+            <button id="pause-btn" class="button is-fullwidth is-large">⏸️ Pause</button>
+            <button id="resume-btn" class="button is-fullwidth is-large">▶️ Resume</button>
+            <button id="stop-btn" class="button is-fullwidth is-large">⏹️ Stop</button>
+          </div>
+        </div>
+			</div>
+		</section>
 	</div>
 
+  <section class="p-4" id="main-content">
+    <div class="p-4" id="delete-multiple">
+      <button class="button is-large is-fullwidth">Delete all</button>
+    </div>
 
-	<div class="center">
-		<div class="links">
-			<a href="http://age-calculator.idkey.in/">Age and Date Calculator</a>
-			<a href="https://dialogue.idkey.in/">Movie Dialogues</a>
-			<a href="http://record.idkey.in/">Screen Recorder</a>
-			<a href="https://digipin.idkey.in/">DIGIPIN</a>
-			<a href="https://pass.idkey.in/">Secured Password Generator</a>
-			<a href="https://ip.idkey.in/">What's My IP Address?</a>
-			<a href="http://palette.idkey.in/">Color Palette Generator from Image</a>
-		</div>
+  	<h2 class="title">Recordings</h2>
+  	<div id="recordings" class="columns is-multiline"></div>
+  </section>
+
+
+	<div class="modal" id="playback-modal">
+    <div class="modal-background"></div>
+    <button class="is-large modal-close"></button>
+    <div class="modal-content">
+      <div class="box">
+        <video id="video-playback" controls></video>
+      </div>
+    </div>
 	</div>
+
+	<footer class="links w3-border-top w3-border-theme">
+		<a href="http://age-calculator.idkey.in/">Age and Date Calculator</a>
+		<a href="https://dialogue.idkey.in/">Movie Dialogues</a>
+		<a href="http://record.idkey.in/">Screen Recorder</a>
+		<a href="https://digipin.idkey.in/">DIGIPIN</a>
+		<a href="https://pass.idkey.in/">Secured Password Generator</a>
+		<a href="https://ip.idkey.in/">What's My IP Address?</a>
+		<a href="http://palette.idkey.in/">Color Palette Generator from Image</a>
+	</footer>
 
 	<script src="/script.js"></script>
 </body>
