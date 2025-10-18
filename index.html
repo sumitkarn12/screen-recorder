@@ -22,7 +22,7 @@
 
 	<link rel="shortcut icon" href="https://record.idkey.in/logo.jpg" type="image/x-icon" />
 
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css" />
 	<link rel="stylesheet" href="/style.css">
 </head>
 
@@ -33,50 +33,458 @@
 			<div class="hero-body">
 				<h1 class="title is-1">Record your screen</h1>
 				<p class="subtitle">Record your screen with no timelimit for free with audio.</p>
-        <article class="message mb-0">
-          <p class="message-body" id="msg">Loading available recording space...</p>
-        </article>
-        <div class="controls-wrapper">
-          <div class="controls">
-            <button id="start-btn" class="button is-primary is-rounded is-fullwidth is-large">🎬 Start recording</button>
-            <button id="pause-btn" class="button is-fullwidth is-large">⏸️ Pause</button>
-            <button id="resume-btn" class="button is-fullwidth is-large">▶️ Resume</button>
-            <button id="stop-btn" class="button is-fullwidth is-large">⏹️ Stop</button>
-          </div>
-        </div>
+				<article class="message mb-0">
+					<p class="message-body" id="msg">Loading available recording space...</p>
+				</article>
 			</div>
 		</section>
 	</div>
 
-  <section class="p-4" id="main-content">
-    <div class="p-4" id="delete-multiple">
-      <button class="button is-large is-fullwidth">Delete all</button>
-    </div>
-
-  	<h2 class="title">Recordings</h2>
-  	<div id="recordings" class="columns is-multiline"></div>
-  </section>
-
+	<section class="p-4 container" id="main-content">
+		<h2 class="title">Recordings</h2>
+		<div id="recordings" class="columns is-multiline"></div>
+		<div class="controls-wrapper">
+			<div class="controls container">
+				<button id="start-btn" class="button is-primary is-rounded is-fullwidth is-large">🎬 Start recording</button>
+				<button id="pause-btn" class="button is-fullwidth is-large">⏸️ Pause</button>
+				<button id="resume-btn" class="button is-fullwidth is-large">▶️ Resume</button>
+				<button id="stop-btn" class="button is-fullwidth is-large">⏹️ Stop</button>
+			</div>
+		</div>
+		<div id="delete-multiple">
+			<div class="container p-4">
+				<button class="button is-large is-rounded is-danger is-fullwidth">Delete all</button>
+			</div>
+		</div>
+	</section>
 
 	<div class="modal" id="playback-modal">
-    <div class="modal-background"></div>
-    <button class="is-large modal-close"></button>
-    <div class="modal-content">
-      <div class="box">
-        <video id="video-playback" controls></video>
-      </div>
-    </div>
+		<div class="modal-background"></div>
+		<button class="is-large modal-close"></button>
+		<div class="modal-content">
+			<div class="box">
+				<video id="video-playback" controls></video>
+			</div>
+		</div>
 	</div>
 
-	<footer class="links w3-border-top w3-border-theme">
-		<a href="http://age-calculator.idkey.in/">Age and Date Calculator</a>
-		<a href="https://dialogue.idkey.in/">Movie Dialogues</a>
-		<a href="http://record.idkey.in/">Screen Recorder</a>
-		<a href="https://digipin.idkey.in/">DIGIPIN</a>
-		<a href="https://pass.idkey.in/">Secured Password Generator</a>
-		<a href="https://ip.idkey.in/">What's My IP Address?</a>
-		<a href="http://palette.idkey.in/">Color Palette Generator from Image</a>
+	<section class="container mt-4">
+		<article class="content p-4">
+			<h2>The Ultimate Screen Recorder Online: Free, Unlimited, and Private 🎥</h2>
+			<hr>
+			<h3>Capture Your Screen Without Limits or Worries</h3>
+			<p>Tired of complex software, confusing sign-ups, and restrictive time limits? Welcome to the simplest, most
+				secure way to capture your desktop or mobile screen. Our <strong>online screen recorder</strong> is
+				designed for
+				speed and privacy, working entirely within your browser to deliver truly
+				<strong>unlimited screen recording time</strong> at
+				no cost.</p>
+			<p><strong>Record your screen with no time limit for free with audio.</strong></p>
+			<p>We believe screen recording should be effortless. Whether you’re creating a tutorial, capturing a bug
+				report, or saving a live stream, our tool ensures your focus remains on your content, not on countdown
+				timers or
+				watermarks.
+			</p>
+			<h3>Your Privacy is Our Priority: The Power of Local Recording</h3>
+			<p>Unlike most web applications, our screen recording solution operates on a <strong>no-backend</strong>
+				architecture.
+			</p>
+			<p>This is a critical difference: the entire recording process is handled by <strong>JavaScript</strong>
+				using your device&#39;s native capabilities. Your recorded media remains 100% within your browser’s
+				<strong>local storage</strong>.</p>
+			<ul>
+				<li><strong>Zero Uploads:</strong> Your private videos are <em>never</em> transmitted to our servers or
+					any third party. </li>
+				<li><strong>Complete Control:</strong> You control the files, from viewing and renaming to permanent
+					deletion. </li>
+				<li><strong>Instant Access:</strong> Once you stop recording, the video is immediately available for
+					<strong>preview</strong> and <strong>download</strong>. You can also monitor your browser&#39;s
+					allocated and used storage space right on the page.</li>
+			</ul>
+			<h3>Effortless Management of Your Screen Captures</h3>
+			<p>Keeping your workspace organized is easy. All your video sessions are displayed in a clean, card-based
+				interface, neatly categorized by their recorded dates.</p>
+			<p><strong>Key Features for Managing Your Recordings:</strong></p>
+			<ul>
+				<li><strong>Quick Actions:</strong> Each recording card provides instant access to
+					<strong>delete</strong>,
+					<strong>rename</strong>, <strong>preview</strong>, and <strong>download</strong> buttons. Renaming
+					is
+					smart—we
+					automatically sanitize your file names by replacing spaces with hyphens (-) and removing other
+					non-allowed
+					characters for clean file management. </li>
+				<li><strong>Preview Mode:</strong> Click the <strong>Preview</strong> button to instantly open a modal
+					with
+					a video
+					player, allowing you to quickly review your recording before committing to a download or deletion.
+				</li>
+				<li><strong>Batch Processing:</strong> For power users, managing large volumes of recordings is
+					streamlined.
+					Simply
+					click any recording card to select it. When one or more clips are selected, a fixed &#39;Delete
+					All&#39;
+					button
+					appears at the bottom of the page, allowing you to remove multiple files simultaneously after a
+					simple
+					confirmation.</li>
+			</ul>
+			<h3>Intuitive, Always-Ready Controls</h3>
+			<p>The interface is designed for maximum efficiency. The <strong>Start Recording</strong> button remains
+				conveniently
+				fixed at the bottom of your screen. When recording begins, it is instantly replaced by the necessary
+				<strong>Pause</strong> and <strong>Stop</strong> buttons, which remain fixed for easy access throughout
+				your
+				session. If you hit &#39;Pause&#39;, it seamlessly changes to a &#39;Resume&#39; button, ensuring you
+				never
+				miss a
+				moment.</p>
+		</article>
+	</section>
+
+	<!-- FAQs -->
+	<div class="container  px-4 mt-4 mb-2">
+		<h3 class="is-size-4">Frequently Asked Questions (FAQ)</h3>
+	</div>
+	<section class="container faqs px-4">
+		<div class="columns is-multiline">
+			<article class="column is-half-tablet is-one-third-desktop">
+				<div class="message">
+					<div class="message-header">Is this screen recorder genuinely free and unlimited?</div>
+					<div class="message-body">
+						Yes, absolutely! We offer <strong>unlimited screen recording time</strong> at no cost. There
+						are no premium features, no mandatory sign-ups, and no hidden fees to unlock full
+						functionality. Use it as often as you need, for as long as you need.
+					</div>
+				</div>
+			</article>
+			<article class="column is-half-tablet is-one-third-desktop">
+				<div class="message">
+					<div class="message-header">Where are my recordings saved and how private are they?</div>
+					<div class="message-body">
+						Your recordings are saved <em>only</em> in your browser&#39;s local storage on the specific
+						device you used for recording. They are completely <strong>private</strong> because we
+						operate on a no-backend model, meaning the video files are
+						<strong>never uploaded</strong> to the internet or any server we control. Your data stays
+						with you.
+					</div>
+				</div>
+			</article>
+			<article class="column is-half-tablet is-one-third-desktop">
+				<div class="message">
+					<div class="message-header">Does this tool record both my screen and my voice?</div>
+					<div class="message-body">
+						Yes, it does! When you click &#39;Start Recording&#39;, your browser will prompt you to
+						grant permissions for both your screen/window/tab and your microphone. This capability
+						allows you to create comprehensive tutorials, voice-over presentations, and interactive
+						walkthroughs with synchronized audio.
+					</div>
+				</div>
+			</article>
+			<article class="column is-half-tablet is-one-third-desktop">
+				<div class="message">
+					<div class="message-header">
+						What happens if my browser is too old or doesn&#39;t support the feature?
+					</div>
+					<div class="message-body">
+						We perform a compatibility check the moment you load the page. If your current browser is
+						missing the necessary web APIs for direct <strong>browser screen recording</strong>, a clear
+						message will be displayed on the page, letting you know immediately. We recommend using the
+						latest versions of major browsers like Chrome, Firefox, or Edge for the best experience.
+					</div>
+				</div>
+			</article>
+			<article class="column is-half-tablet is-one-third-desktop">
+				<div class="message">
+					<div class="message-header">Can I download my recorded videos to my computer?</div>
+					<div class="message-body">
+						Yes, the <strong>Download</strong> button on each recording card is self-explanatory.
+						Clicking it prompts your browser to save the video file directly to your computer&#39;s
+						local hard drive.
+					</div>
+				</div>
+			</article>
+			<article class="column is-half-tablet is-one-third-desktop">
+				<div class="message">
+					<div class="message-header">How do I delete multiple recordings at once?</div>
+					<div class="message-body">
+						To delete multiple recordings, simply click on the cards you wish to remove. They will zoom
+						out slightly to indicate selection. Once you&#39;ve selected your files, a
+						<strong>Delete All</strong> button will appear at the bottom of the page. Click it, confirm
+						your choice, and the selected files will be instantly cleared from your local storage.
+					</div>
+				</div>
+			</article>
+			<article class="column is-half-tablet is-one-third-desktop">
+				<div class="message">
+					<div class="message-header">
+						I clicked Start Recording, but I don&#39;t see any files popping up on my computer! Where
+						did my video go? Is it lost?
+					</div>
+					<div class="message-body">
+						<strong>Absolutely not lost!</strong> That is the best thing about this app. Your recording
+						is safely stored <em>inside your web browser</em> right now. Since we don&#39;t upload
+						anything to the internet, you must finish and then click the
+						<strong>Download</strong> button on the video card to save the file to your computer&#39;s
+						hard drive. Your videos are listed right on this page!
+					</div>
+				</div>
+			</article>
+			<article class="column is-half-tablet is-one-third-desktop">
+				<div class="message">
+					<div class="message-header">
+						I usually have to sign up and give you my email. Are you going to trick me and ask for money
+						later, or do I need an account?
+					</div>
+					<div class="message-body">
+						<strong>Never!</strong> This tool is completely <strong>free</strong> and requires
+						<strong>zero signup, zero email, and zero accounts</strong>. We keep it simple. You open the
+						link, you record, you download. That’s it. No tricks, no hidden costs.
+					</div>
+				</div>
+			</article>
+			<article class="column is-half-tablet is-one-third-desktop">
+				<div class="message">
+					<div class="message-header">
+						When I click &#39;Start Recording,&#39; it asks me for permission. Why do I have to share my
+						whole screen? Is someone watching me right now?
+					</div>
+					<div class="message-body">
+						<strong>Nobody is watching you!</strong> Your browser (like Chrome or Firefox) is just
+						asking for your permission to access your screen so it can <em>record it</em>. This is a
+						standard security step. We only use that access to save the video file <em>locally</em> on
+						your device. Once you stop recording, the permission goes away.
+					</div>
+				</div>
+			</article>
+			<article class="column is-half-tablet is-one-third-desktop">
+				<div class="message">
+					<div class="message-header">
+						I saw the little timer running forever! Does this mean the recording never stops? Will it
+						fill up my whole computer?
+					</div>
+					<div class="message-body">
+						Great observation! We offer <strong>unlimited recording time</strong>, which means we
+						don&#39;t force you to stop. However, to finish, you must click the big
+						<strong>Stop</strong>
+						button that appears at the bottom of the page. Don&#39;t worry about filling up your whole
+						computer—the app monitors your browser&#39;s storage, and you can easily
+						<strong>delete</strong> old videos when you are done with them!
+					</div>
+				</div>
+			</article>
+			<article class="column is-half-tablet is-one-third-desktop">
+				<div class="message">
+					<div class="message-header">
+						I accidentally named my video &#39;My super special video with spaces and weird
+						characters!&#39;. Will my computer break? How do I fix the name?
+					</div>
+					<div class="message-body">
+						Your computer is safe! Our app is smart. When you click the
+						<strong>Rename</strong> button and type in a new name, we automatically clean up the title
+						for you. We take care of all the spaces and weird symbols so your file name works perfectly
+						on any device. Just click <strong>Rename</strong> and give it the new title.
+					</div>
+				</div>
+			</article>
+			<article class="column is-half-tablet is-one-third-desktop">
+				<div class="message">
+					<div class="message-header">
+						I have 10 recordings now, and I only want to delete the first three. It’s too much work! Is
+						there a faster way than clicking delete 3 times?
+					</div>
+					<div class="message-body">
+						Absolutely, there is a faster way! This is what the
+						<strong>Batch Delete</strong> feature is for. Simply <strong>click on the cards</strong> for
+						the three videos you want to remove. You&#39;ll see them slightly fade to show they are
+						selected. Then, just click the <strong>Delete All</strong> button that appears at the bottom.
+						One click, three videos gone!
+					</div>
+				</div>
+			</article>
+			<article class="column is-half-tablet is-one-third-desktop">
+				<div class="message">
+					<div class="message-header">
+						I recorded something, but now I closed the browser tab. When I open the link again, are all
+						my recordings gone forever?
+					</div>
+					<div class="message-body">
+						<strong>No, your recordings are still safe!</strong> Because they are saved in your
+						browser&#39;s <em>local storage</em>, as long as you use the
+						<strong>same browser</strong>
+						on the
+						<strong>same device</strong>, they will all reload and appear on the page when you come back
+						to the web address.
+					</div>
+				</div>
+			</article>
+			<article class="column is-half-tablet is-one-third-desktop">
+				<div class="message">
+					<div class="message-header">
+						My video card shows a date and time. If I change the name of the video, will that date and
+						time also change?
+					</div>
+					<div class="message-body">
+						No, the date and time shown is when the recording was
+						<strong>first created</strong>, and that never changes. You can rename the file as many
+						times as you like, but the original recording date will always stay the same for your
+						reference.
+					</div>
+				</div>
+			</article>
+			<article class="column is-half-tablet is-one-third-desktop">
+				<div class="message">
+					<div class="message-header">
+						I pressed the &#39;Pause&#39; button, and now it says &#39;Resume&#39;! If I close the page
+						now, will the video still be paused, or is it ruined?
+					</div>
+					<div class="message-body">
+						If you close the page while the recording is paused,
+						<strong>the recording is ruined</strong>, unfortunately. You must click
+						<strong>Resume</strong>
+						and then click the final <strong>Stop</strong> button to save the file correctly. Think of
+						<strong>Pause</strong> as a brief <em>time-out</em>. If you need to walk away completely,
+						press
+						<strong>Stop</strong>
+						first!
+					</div>
+				</div>
+			</article>
+			<article class="column is-half-tablet is-one-third-desktop">
+				<div class="message">
+					<div class="message-header">
+						I clicked &#39;Preview&#39; and a window popped up, but the video won&#39;t start playing!
+						Is the file broken?
+					</div>
+					<div class="message-body">
+						The file is likely not broken! When the preview window (the modal) opens, you must click the
+						<strong>Play button</strong> that is visible on the video player itself. It won&#39;t start
+						playing automatically, but as soon as you hit Play, it will work perfectly.
+					</div>
+				</div>
+			</article>
+			<article class="column is-half-tablet is-one-third-desktop">
+				<div class="message">
+					<div class="message-header">
+						I don&#39;t see the &#39;Start Recording&#39; button! Did it disappear? Is my computer too
+						old to do this?
+					</div>
+					<div class="message-body">
+						The <strong>Start Recording</strong> button is always fixed at the very bottom of the page!
+						It only disappears when you are actively recording (and is replaced by the Pause/Stop
+						buttons). If you don&#39;t see it, try scrolling all the way down. If you still can&#39;t
+						see it, check the top of the page; your browser might be too old, and we display a message
+						there if it can&#39;t support the feature.
+					</div>
+				</div>
+			</article>
+			<article class="column is-half-tablet is-one-third-desktop">
+				<div class="message">
+					<div class="message-header">
+						I see the &#39;Used Storage&#39; number, but it hasn&#39;t changed, even after I just
+						recorded a five-minute video! Is my recording not being saved?
+					</div>
+					<div class="message-body">
+						Don&#39;t worry, your recording is absolutely being saved! That storage number is
+						<strong>not updated in real-time</strong>. It might take a moment, or you may need to
+						refresh the page, before the app queries the browser again and shows the new, larger number.
+						The best way to know your video is saved is by seeing its card appear below with the correct
+						name and size.
+					</div>
+				</div>
+			</article>
+			<article class="column is-half-tablet is-one-third-desktop">
+				<div class="message">
+					<div class="message-header">
+						When I delete an old video, the &#39;Used Storage&#39; number doesn&#39;t drop instantly.
+						Did the delete button not work, or is the video still taking up space?
+					</div>
+					<div class="message-body">
+						The delete button worked perfectly! Because the storage information is
+						<strong>not a live feed</strong>, you won&#39;t see the number drop immediately. The space
+						has been freed up, but the display will only update when the app next checks the
+						browser&#39;s memory, which is usually upon a page refresh or a new recording action. You
+						can trust that the video is gone once its card disappears.
+					</div>
+				</div>
+			</article>
+			<article class="column is-half-tablet is-one-third-desktop">
+				<div class="message">
+					<div class="message-header">
+						My screen recorder is black, but my friend&#39;s is white. I want the white one! How do I
+						switch the color settings in the app?
+					</div>
+					<div class="message-body">
+						The app itself <strong>does not have a color setting</strong> you can change. It
+						automatically detects and uses whatever color mode (Dark Mode or Light Mode) you have set up
+						on your device—your computer, tablet, or phone. If you want a white background, you must
+						switch your device&#39;s overall operating system setting from Dark Mode to Light Mode. The
+						app will then follow that change.
+					</div>
+				</div>
+			</article>
+			<article class="column is-half-tablet is-one-third-desktop">
+				<div class="message">
+					<div class="message-header">
+						I selected 5 videos and I see the &#39;Delete All&#39; button, but why isn&#39;t there a
+						&#39;Download All&#39; button? I don&#39;t want to click five times!
+					</div>
+					<div class="message-body">
+						That&#39;s a great request, and we hear you! Right now, our system is built for speed and
+						privacy, and due to browser security rules, we
+						<strong>cannot download multiple videos at once</strong>. You must click the
+						<strong>Download</strong>
+						button on each card individually. We focused on making the recording reliable and private
+						first.
+					</div>
+				</div>
+			</article>
+			<article class="column is-half-tablet is-one-third-desktop">
+				<div class="message">
+					<div class="message-header">
+						I clicked on a video card, and it looks a little smaller and faded now. Is this a glitch?
+						Did I ruin the video file?
+					</div>
+					<div class="message-body">
+						That&#39;s not a glitch—it&#39;s a helpful signal! When you
+						<strong>click a card</strong>, it gets slightly smaller and fades out a little bit to show
+						you that it has been <strong>selected</strong>. This feature is there so you can pick
+						multiple videos at once to delete them all quickly. Just click it again to unselect it if
+						you change your mind.
+					</div>
+				</div>
+			</article>
+			<article class="column is-half-tablet is-one-third-desktop">
+				<div class="message">
+					<div class="message-header">
+						The &#39;Start Recording&#39; button is always stuck at the bottom, and the Pause/Stop
+						buttons are stuck there too! Why do they follow me when I scroll?
+					</div>
+					<div class="message-body">
+						They are designed to stay in place! This is called a
+						<strong>fixed position</strong>, and we did this on purpose so that your most important
+						controls—<strong>Start, Pause, and Stop</strong>—are always immediately accessible, no
+						matter how many recordings you have on your screen. You never have to scroll to find the
+						main action button!
+					</div>
+				</div>
+			</article>
+		</div>
+	</section>
+
+	<footer class="container">
+		<div class="links">
+			<a href="http://age-calculator.idkey.in/">Age and Date Calculator</a>
+			<a href="https://dialogue.idkey.in/">Movie Dialogues</a>
+			<a href="http://record.idkey.in/">Screen Recorder</a>
+			<a href="https://digipin.idkey.in/">DIGIPIN</a>
+			<a href="https://pass.idkey.in/">Secured Password Generator</a>
+			<a href="https://ip.idkey.in/">What's My IP Address?</a>
+			<a href="http://palette.idkey.in/">Color Palette Generator from Image</a>
+		</div>
 	</footer>
+
+	<div id="footer-spacer"></div>
 
 	<script src="/script.js"></script>
 </body>

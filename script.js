@@ -255,19 +255,15 @@ function renderHistory() {
     column.dataset.id = data.id;
     historyContainer.appendChild( column );
   });
-
-  historyContainer.style.display = 'flex';
 }
 
 renderHistory();
 
 if (!navigator.mediaDevices.getDisplayMedia) {
   document.querySelector(".controls").style.display = "none";
-  historyContainer.style.display = "none";
-  msg.style.display = "block";
+  document.querySelector("#main-content").style.display = "none";
   msg.innerText = "Your browser does not support screen recording feature.";
 } else {
-  historyContainer.style.display = "flex";
   setInterval(() => {
     msg.style.display = "block";
     estimateStorage().then(m => {
