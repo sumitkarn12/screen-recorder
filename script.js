@@ -6,8 +6,9 @@ const controlsWrapper = document.querySelector('.controls-wrapper');
 const msg = document.getElementById('msg');
 const videoPlayback = document.getElementById('video-playback');
 const historyContainer = document.getElementById('recordings');
+const cancelRecordingCardSelection = document.getElementById('cancel-recording-selection');
 const modal = document.querySelector('#playback-modal');
-const multiDeleteBtn = document.querySelector('#delete-multiple button');
+const multiDeleteBtn = document.querySelector('#delete-multiple-button');
 
 const HISOTY_KEY = `RECORDINGS`;
 
@@ -116,10 +117,51 @@ function closeModal() {
   videoPlayback.pause();
 }
 
-document.addEventListener("keyup", e => {
-  if(e.keyCode == 27)
+function cancelRecordingCardSelector() {
+  document.querySelectorAll( ".recording-card-selector" ).forEach( el => {
+    el.checked = false;
+  });
+}
+
+cancelRecordingCardSelection.addEventListener("click", cancelRecordingCardSelector );
+
+document.addEventListener("keydown", e => {
+  if ( e.ctrlKey )
+    console.log( e.keyCode, e.key );
+
+  if (e.key === '?' && e.shiftKey && !e.target.matches('input, textarea')) {
+    e.preventDefault(); // Prevent the '?' character from being typed
+    showShortcutsModal();
+  }
+
+
+  if ( mediaRecorder ) {
+    if (e.keyCode == 83 && mediaRecorder.state == "inactive" ) {
+        startBtn.click();
+    } else if (e.keyCode == 83 && mediaRecorder.state == "recording" ) {
+        stopBtn.click();
+    } else if (e.keyCode == 80 && mediaRecorder.state == "recording" ) {
+      pauseBtn.click();
+    } else if (e.keyCode == 82 && mediaRecorder.state == "paused" ) {
+      resumeBtn.click();
+    }
+  } else if ( e.keyCode == 83 ) {
+    startBtn.click();
+  } else if (e.ctrlKey && e.keyCode == 65 ) {
+    document.querySelectorAll(".recording-card-selector").forEach(el => {
+      el.checked = true;
+    });
+  } else if ( e.keyCode == 8 ) {
+    multiDeleteBtn.click();
+  }
+  
+  if(e.keyCode == 27) {
     closeModal();
+    cancelRecordingCardSelector();
+    closeShortcutsModal();
+  }
 });
+
 document.querySelectorAll('#playback-modal .modal-close, #playback-modal .modal-background').forEach( el => {
   el.addEventListener("click", closeModal );
 });
@@ -241,7 +283,7 @@ function renderHistory() {
     card.appendChild( cardContainer );
     card.appendChild( dropdownContainer );
 
-    let checkbox = createElement( "input", ["is-hidden"] , null);
+    let checkbox = createElement( "input", ["is-hidden", "recording-card-selector"] , null);
     checkbox.setAttribute( "type", "checkbox" );
     checkbox.id = data.id;
     checkbox.value = data.id;
@@ -270,4 +312,101 @@ if (!navigator.mediaDevices.getDisplayMedia) {
       msg.textContent = m;
     });
   }, 4 * 1000);
+}
+
+/**
+ * Global function to close the shortcuts modal.
+ */
+function closeShortcutsModal() {
+  const modal = document.getElementById('shortcuts-modal');
+  if (modal) {
+    modal.classList.remove('is-active');
+    // For a cleaner DOM, we can remove the element after a short delay
+    setTimeout(() => {
+      if (modal.parentNode) {
+        modal.parentNode.removeChild(modal);
+      }
+    }, 150);
+  }
+}
+
+/**
+ * Creates and displays the keyboard shortcuts modal popup using Bulma CSS.
+ */
+function showShortcutsModal() {
+  // Prevent multiple modals from opening
+  if (document.getElementById('shortcuts-modal')) return;
+
+  // 1. Define the list of shortcuts
+  const shortcuts = [
+    { keys: 'Shift + ?', description: 'Show all keyboard shortcuts (this popup)' },
+    { keys: 'S', description: 'Start/Stop recording' },
+    { keys: 'P', description: 'Pause recording' },
+    { keys: 'R', description: 'Resume recording' },
+    { keys: 'Ctrl + A', description: 'Select all recording cards' },
+    { keys: 'Backspace', description: 'Delete selected recording cards' },
+    { keys: 'Esc', description: 'Close any active modal / Cancel card selection' }
+  ];
+
+  // 2. Create the Modal structure (Bulma: .modal)
+  const modal = document.createElement('div');
+  modal.id = 'shortcuts-modal';
+  modal.classList.add('modal', 'is-active'); // 'is-active' makes it visible immediately
+
+  // 3. Create the Modal Background (Bulma: .modal-background)
+  const background = document.createElement('div');
+  background.classList.add('modal-background');
+  // Close the modal when the background is clicked
+  background.onclick = closeShortcutsModal;
+  modal.appendChild(background);
+
+  // 4. Create the Modal Content (Bulma: .modal-content)
+  const content = document.createElement('div');
+  content.classList.add('modal-content', 'box'); // 'box' for a nice background/padding
+
+  // 5. Title
+  const title = document.createElement('p');
+  title.classList.add('title', 'is-4');
+  title.textContent = 'Keyboard Shortcuts';
+  content.appendChild(title);
+
+  // 6. Shortcuts Table/List
+  const table = document.createElement('table');
+  table.classList.add('table', 'is-striped', 'is-fullwidth');
+
+  const tbody = document.createElement('tbody');
+
+  shortcuts.forEach(shortcut => {
+    const row = document.createElement('tr');
+
+    // Keys Column
+    const keysCell = document.createElement('td');
+    // Use the Bulma tag component for a key-like visual
+    keysCell.innerHTML = `<span class="tag is-info is-light">${shortcut.keys}</span>`;
+    keysCell.style.width = '150px'; // Give the keys column a fixed width
+    row.appendChild(keysCell);
+
+    // Description Column
+    const descCell = document.createElement('td');
+    descCell.textContent = shortcut.description;
+    row.appendChild(descCell);
+
+    tbody.appendChild(row);
+  });
+
+  table.appendChild(tbody);
+  content.appendChild(table);
+
+  // 7. Append Content to Modal
+  modal.appendChild(content);
+
+  // 8. Close Button (Bulma: .modal-close)
+  const closeBtn = document.createElement('button');
+  closeBtn.classList.add('modal-close', 'is-large');
+  closeBtn.setAttribute('aria-label', 'close');
+  closeBtn.onclick = closeShortcutsModal;
+  modal.appendChild(closeBtn);
+
+  // 9. Append everything to the body
+  document.body.appendChild(modal);
 }
