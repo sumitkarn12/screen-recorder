@@ -410,3 +410,8 @@ function showShortcutsModal() {
   // 9. Append everything to the body
   document.body.appendChild(modal);
 }
+
+
+if (typeof navigator.serviceWorker !== 'undefined') {
+  navigator.serviceWorker.register('sw.js')
+}
