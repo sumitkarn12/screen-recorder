@@ -1,11 +1,6 @@
 html { scroll-behavior: smooth; }
-
-#footer-spacer {
-  margin-bottom: 120px;
-}
-
+#footer-spacer { margin-bottom: 120px; }
 .overflow-hidden { overflow:  hidden; }
-
 .controls-wrapper {
   padding: 32px;
   position: fixed;
@@ -51,12 +46,20 @@ html { scroll-behavior: smooth; }
   content: '🎥';
   display: block;
 }
-.recording { position: relative; }
+.recording { position: relative; animation-name: fadeIn; animation-timeline: view(); }
 #recordings .size::before { content: '📦'; padding-right: 6px; }
 #recordings .time::before { content: '🕰️'; padding-right: 6px; }
 
 #recordings .column .card { transition: all 0.3s ease; cursor: pointer; }
 #recordings .column input[type=checkbox]:checked + .card { transform: scale(0.9); opacity: 0.4; }
+
+@keyframes fadeIn {
+  0% { opacity: 0; transform: translateX(-100%); }
+  40% { opacity: 1; transform: translateX(0); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+.content > *, article.column .message { animation-name: fadeIn; animation-timeline: view(); }
 
 #delete-multiple {
   width: 100%;
@@ -68,6 +71,13 @@ html { scroll-behavior: smooth; }
   transform: translateY(100%);
   transition: all 1s ease;
 }
+
+#delete-multiple > div {
+  display: flex;
+  gap: 16px;
+}
+
+#delete-multiple > div button { width: 100%; }
 
 #main-content:has(input[type=checkbox]:checked) #delete-multiple { transform: translateY(0%); }
 #main-content:has(input[type=checkbox]:checked) .controls-wrapper { transform: translateY(100%); }
