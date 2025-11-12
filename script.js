@@ -15,6 +15,7 @@ const DEF_OF_NEW_RECORDING = 5 * 60 * 1000; // Not recorded more than 5 mins ago
 
 let mediaRecorder, stream;
 let recordedChunks = [];
+let currentRecording = null;
 
 const db = new Dexie(HISOTY_KEY);
 db.version(1).stores({
@@ -30,6 +31,7 @@ function showToast(m, d = 5) {
   Toastify({
     text: m,
     duration: d * 1000,
+    close: true
   }).showToast();
 }
 
@@ -92,20 +94,28 @@ function saveRecording(mimeType) {
   recordedChunks = [];
   const videoURL = URL.createObjectURL(blob);
 
-  videoPlayback.src = videoURL;
+  let v = document.createElement("video");
+  v.addEventListener("loadeddata", ev => {
+    console.log( "LOADEDDATA", ev );
+    let recordedAt = new Date();
 
-  let recordedAt = new Date();
+    db.recordings.add({
+      "blob": blob,
+      "at": recordedAt,
+      "title": `record.idkey.in-${dateFormatter.format(new Date()).replaceAll(/\W/gi, '-')}.webm`,
+      "duration": Math.round(v.duration),
+      "dimension": v.videoWidth+"x"+v.videoHeight
+    }).then(a => {
+      renderHistory();
+      v.remove();
+    });
 
-  db.recordings.add({
-    "blob": blob,
-    "at": recordedAt,
-    "title": `record.idkey.in-${dateFormatter.format(new Date()).replaceAll(/\W/gi, '-')}.webm`
-  }).then(a => { renderHistory() });
+    // Stop the media stream tracks
+    stream.getTracks().forEach(track => track.stop());
 
-  // Stop the media stream tracks
-  stream.getTracks().forEach(track => track.stop());
-
-  updateControls(1, 0, 0, 0);
+    updateControls(1, 0, 0, 0);
+  });
+  v.src = videoURL;
 }
 
 function closeModal() {
@@ -118,6 +128,30 @@ function cancelRecordingCardSelector() {
     el.checked = false;
   });
 }
+
+videoPlayback.addEventListener("resize", e => {
+  console.log( "Video Dimensio", e.target.videoWidth, e.target.videoHeight );
+  modal.querySelector(".modal-content").style.height = "auto";
+  modal.querySelector(".modal-content").style.width = "auto";
+  if ( e.target.videoWidth - e.target.videoHeight) {
+    modal.querySelector(".modal-content").style.height = "100%";
+  } else {
+    modal.querySelector(".modal-content").style.height = "100%";
+  }
+  let isDirty = false;
+  if ( !currentRecording.dimension ) {
+    currentRecording.dimension = `${e.target.videoWidth}x${e.target.videoHeight}`
+    isDirty = true;
+  }
+  if ( !currentRecording.duration ) {
+    currentRecording.duration = Math.round(e.target.duration);
+    isDirty = true;
+  }
+  if ( isDirty )
+  db.recordings.put( currentRecording ).then( r => {
+    console.log( r, "Record updated" )
+  });
+})
 
 cancelRecordingCardSelection.addEventListener("click", cancelRecordingCardSelector);
 
@@ -248,6 +282,7 @@ function renderHistory() {
 
     let preview = createElement("button", ["preview", "card-footer-item"], "👀");
     preview.addEventListener("click", async r => {
+      currentRecording = data;
       r.preventDefault();
       videoPlayback.src = a.href;
       modal.classList.add("is-active");
@@ -271,11 +306,21 @@ function renderHistory() {
     dropdownContainer.appendChild(preview);
     dropdownContainer.appendChild(a);
 
-    let card = createElement("div", ["card", "recording"], null);
+    let card = createElement("div", ["card", "recording", "is-flex", "is-flex-direction-column"], null);
     let cardContainer = createElement("div", ["card-content"], null);
     cardContainer.appendChild(createElement("h3", ["rec-title", "subtitle", "block"], `${data.title}`));
-    cardContainer.appendChild(createElement("span", ["size", "tag"], `${(data.blob.size / (1024 * 1024)).toFixed(2)}MB`));
-    cardContainer.appendChild(createElement("span", ["time", "tag", "ml-2"], `${data.at.toLocaleTimeString(navigator.language)}`));
+
+    const tags = createElement("div", ["tags"], null);
+    cardContainer.appendChild( tags );
+    tags.appendChild(createElement("span", ["size", "tag"], `${(data.blob.size / (1024 * 1024)).toFixed(2)}MB`));
+    tags.appendChild(createElement("span", ["time", "tag"], `${data.at.toLocaleTimeString(navigator.language)}`));
+
+    if ( data.dimension ) {
+      tags.appendChild(createElement("span", ["dimension", "tag"], `${data.dimension}`));
+    }
+    if ( data.duration ) {
+      tags.appendChild(createElement("span", ["duration", "tag"], `${data.duration}s`));
+    }
 
     card.appendChild(cardContainer);
     if( (Date.now() - data.at.getTime()) <= DEF_OF_NEW_RECORDING )
@@ -300,8 +345,6 @@ function renderHistory() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-renderHistory();
-
 const timer = {
   el: document.querySelector(".controls-wrapper .timer"),
   t: null,
@@ -317,6 +360,8 @@ const timer = {
     clearInterval( this.t );
   }
 }
+
+renderHistory();
 
 if (!navigator.mediaDevices.getDisplayMedia) {
   document.querySelector(".controls").style.display = "none";

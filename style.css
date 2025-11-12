@@ -17,14 +17,16 @@ html { scroll-behavior: smooth; }
 
 #pause-btn,
 #resume-btn,
-#stop-btn {
-  display: none;
-}
+#stop-btn { display: none; }
 
 #video-playback {
   max-height: 80vh;
   max-width: 100%;
   margin: 0 auto;
+}
+#playback-modal .modal-close {
+  background-color: var(--bulma-scheme-main);
+  z-index: 1;
 }
 
 #recordings .rec-title {
@@ -65,8 +67,11 @@ html { scroll-behavior: smooth; }
 }
 #recordings .size::before { content: '📦'; padding-right: 6px; }
 #recordings .time::before { content: '🕰️'; padding-right: 6px; }
+#recordings .dimension::before { content: '📐'; padding-right: 6px; }
+#recordings .duration::before { content: '⌚️'; padding-right: 6px; }
 
-#recordings .column .card { transition: all 0.3s ease; cursor: pointer; position: relative; animation-name: fadeIn; animation-timeline: view(0 20%); filter: blur(10px); }
+#recordings .column .card { height: 100%; transition: all 0.3s ease; cursor: pointer; position: relative; animation-name: fadeIn; animation-timeline: view(0 20%); filter: blur(10px); }
+#recordings .column .card .card-content { height: 100%; }
 #recordings .column input[type=checkbox]:checked + .card { transform: scale(0.9); }
 #recordings .column input[type=checkbox]:checked + .card::after {
   position: absolute;
