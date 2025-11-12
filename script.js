@@ -90,6 +90,8 @@ function createElement(nodeName, classes, textContent) {
 }
 
 function saveRecording(mimeType) {
+  timer.stop();
+  timer.el.style.display = "none";
   const blob = new Blob(recordedChunks, { type: mimeType });
   recordedChunks = [];
   const videoURL = URL.createObjectURL(blob);
@@ -256,8 +258,7 @@ stopBtn.addEventListener('click', () => {
   if (mediaRecorder && mediaRecorder.state !== 'inactive') {
     mediaRecorder.stop();
   }
-  timer.stop();
-  timer.el.style.display = "none";
+  // stopping & hiding timer code is in the saveRecording function
 });
 
 function renderHistory() {
