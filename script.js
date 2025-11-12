@@ -11,6 +11,7 @@ const modal = document.querySelector('#playback-modal');
 const multiDeleteBtn = document.querySelector('#delete-multiple-button');
 
 const HISOTY_KEY = `RECORDINGS`;
+const DEF_OF_NEW_RECORDING = 5 * 60 * 1000; // Not recorded more than 5 mins ago 
 
 let mediaRecorder, stream;
 let recordedChunks = [];
@@ -53,11 +54,7 @@ function updateControls(start_shown = 1, pause_shown = 0, resume_shown = 0, stop
   resumeBtn.style.display = (resume_shown) ? "block" : "none";
   stopBtn.style.display = (stop_shown) ? "block" : "none";
 
-  if ( start_shown || resume_shown ) {
-    controlsWrapper.classList.remove("extreme-blur-animation");
-  } else {
-    controlsWrapper.classList.add("extreme-blur-animation");
-  }
+  controlsWrapper.style.height = stop_shown?"100%": "auto";
 }
 
 async function delRecording(data) {
@@ -108,7 +105,6 @@ function saveRecording(mimeType) {
   // Stop the media stream tracks
   stream.getTracks().forEach(track => track.stop());
 
-  showToast("Stopped");
   updateControls(1, 0, 0, 0);
 }
 
@@ -118,16 +114,16 @@ function closeModal() {
 }
 
 function cancelRecordingCardSelector() {
-  document.querySelectorAll( ".recording-card-selector" ).forEach( el => {
+  document.querySelectorAll(".recording-card-selector").forEach(el => {
     el.checked = false;
   });
 }
 
-cancelRecordingCardSelection.addEventListener("click", cancelRecordingCardSelector );
+cancelRecordingCardSelection.addEventListener("click", cancelRecordingCardSelector);
 
 document.addEventListener("keydown", e => {
-  if ( e.ctrlKey )
-    console.log( e.keyCode, e.key );
+  if (e.ctrlKey)
+    console.log(e.keyCode, e.key);
 
   if (e.key === '?' && e.shiftKey && !e.target.matches('input, textarea')) {
     e.preventDefault(); // Prevent the '?' character from being typed
@@ -135,42 +131,42 @@ document.addEventListener("keydown", e => {
   }
 
 
-  if ( mediaRecorder ) {
-    if (e.keyCode == 83 && mediaRecorder.state == "inactive" ) {
-        startBtn.click();
-    } else if (e.keyCode == 83 && mediaRecorder.state == "recording" ) {
-        stopBtn.click();
-    } else if (e.keyCode == 80 && mediaRecorder.state == "recording" ) {
+  if (mediaRecorder) {
+    if (e.keyCode == 83 && mediaRecorder.state == "inactive") {
+      startBtn.click();
+    } else if (e.keyCode == 83 && mediaRecorder.state == "recording") {
+      stopBtn.click();
+    } else if (e.keyCode == 80 && mediaRecorder.state == "recording") {
       pauseBtn.click();
-    } else if (e.keyCode == 82 && mediaRecorder.state == "paused" ) {
+    } else if (e.keyCode == 82 && mediaRecorder.state == "paused") {
       resumeBtn.click();
     }
-  } else if ( e.keyCode == 83 ) {
+  } else if (e.keyCode == 83) {
     startBtn.click();
-  } else if (e.ctrlKey && e.keyCode == 65 ) {
+  } else if (e.ctrlKey && e.keyCode == 65) {
     document.querySelectorAll(".recording-card-selector").forEach(el => {
       el.checked = true;
     });
-  } else if ( e.keyCode == 8 ) {
+  } else if (e.keyCode == 8) {
     multiDeleteBtn.click();
   }
-  
-  if(e.keyCode == 27) {
+
+  if (e.keyCode == 27) {
     closeModal();
     cancelRecordingCardSelector();
     closeShortcutsModal();
   }
 });
 
-document.querySelectorAll('#playback-modal .modal-close, #playback-modal .modal-background').forEach( el => {
-  el.addEventListener("click", closeModal );
+document.querySelectorAll('#playback-modal .modal-close, #playback-modal .modal-background').forEach(el => {
+  el.addEventListener("click", closeModal);
 });
 
 multiDeleteBtn.addEventListener("click", async e => {
   let selectedContent = document.querySelectorAll("input[type=checkbox]:checked");
-  let keys = Array.from(selectedContent).map( c => Number(c.value) );
-  if ( keys.length && confirm( `Are your sure to delete ${keys.length} recordings?` ) ) {
-    let deletedDetails = await db.recordings.bulkDelete( keys );
+  let keys = Array.from(selectedContent).map(c => Number(c.value));
+  if (keys.length && confirm(`Are your sure to delete ${keys.length} recordings?`)) {
+    let deletedDetails = await db.recordings.bulkDelete(keys);
     renderHistory();
   }
 });
@@ -197,9 +193,8 @@ startBtn.addEventListener('click', async () => {
     mediaRecorder.start();
 
     updateControls(0, 1, 0, 1);
-
-    // Update UI state
-    showToast('Recording started...');
+    timer.start();
+    timer.el.style.display = "block";
   } catch (err) {
     console.error("Error: " + err);
     showToast("Error: Could not start recording.");
@@ -210,16 +205,16 @@ startBtn.addEventListener('click', async () => {
 pauseBtn.addEventListener('click', () => {
   if (mediaRecorder && mediaRecorder.state == 'recording') {
     mediaRecorder.pause();
-    showToast("Paused");
     updateControls(0, 0, 1, 1);
+    timer.stop();
   }
 });
 
 resumeBtn.addEventListener('click', () => {
   if (mediaRecorder && mediaRecorder.state == 'paused') {
     mediaRecorder.resume();
-    showToast("Resumed");
     updateControls(0, 1, 0, 1);
+    timer.start( false );
   }
 });
 
@@ -227,6 +222,8 @@ stopBtn.addEventListener('click', () => {
   if (mediaRecorder && mediaRecorder.state !== 'inactive') {
     mediaRecorder.stop();
   }
+  timer.stop();
+  timer.el.style.display = "none";
 });
 
 function renderHistory() {
@@ -280,26 +277,46 @@ function renderHistory() {
     cardContainer.appendChild(createElement("span", ["size", "tag"], `${(data.blob.size / (1024 * 1024)).toFixed(2)}MB`));
     cardContainer.appendChild(createElement("span", ["time", "tag", "ml-2"], `${data.at.toLocaleTimeString(navigator.language)}`));
 
-    card.appendChild( cardContainer );
-    card.appendChild( dropdownContainer );
+    card.appendChild(cardContainer);
+    if( (Date.now() - data.at.getTime()) <= DEF_OF_NEW_RECORDING )
+      card.appendChild( createElement("div", ["new-tag"], null) );
+    card.appendChild(dropdownContainer);
 
-    let checkbox = createElement( "input", ["is-hidden", "recording-card-selector"] , null);
-    checkbox.setAttribute( "type", "checkbox" );
+    let checkbox = createElement("input", ["is-hidden", "recording-card-selector"], null);
+    checkbox.setAttribute("type", "checkbox");
     checkbox.id = data.id;
     checkbox.value = data.id;
     let column = createElement("label", ["column", "is-full-mobile", "is-half-tablet", "is-one-third-desktop", "is-one-quarter-widescreen", "is-one-fifth-fullhd"], null);
-    column.setAttribute("for", data.id );
-    checkbox.setAttribute( "type", "checkbox" );
+    column.setAttribute("for", data.id);
+    checkbox.setAttribute("type", "checkbox");
     checkbox.id = data.id;
     checkbox.value = data.id;
-    column.appendChild( checkbox );
-    column.appendChild( card );
+    column.appendChild(checkbox);
+    column.appendChild(card);
     column.dataset.id = data.id;
-    historyContainer.appendChild( column );
+    historyContainer.appendChild(column);
   });
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 renderHistory();
+
+const timer = {
+  el: document.querySelector(".controls-wrapper .timer"),
+  t: null,
+  s: 0,
+  start: function( reset = true ) {
+    if ( reset ) this.s = 0;
+    clearInterval( this.t )
+    this.t = setInterval( () => {
+      this.el.textContent = (new Date(++this.s * 1000)).toJSON().substring(11, 19)
+    }, 1000);
+  },
+  stop: function() {
+    clearInterval( this.t );
+  }
+}
 
 if (!navigator.mediaDevices.getDisplayMedia) {
   document.querySelector(".controls").style.display = "none";

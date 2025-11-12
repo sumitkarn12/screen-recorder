@@ -2,29 +2,19 @@ html { scroll-behavior: smooth; }
 #footer-spacer { margin-bottom: 120px; }
 .overflow-hidden { overflow:  hidden; }
 .controls-wrapper {
+  user-select: none;
   padding: 32px;
   position: fixed;
   left: 0;
   bottom: 0;
   z-index: 9;
   width: 100%;
-  background-color: rgba(0,0,0,0.5);
-  backdrop-filter: blur( 1px );
   transform: translateY(0%);
-  transition: all 1s ease;
-}
-.extreme-blur-animation {
-  animation-name: bluranimation;
-  animation-duration: 1s;
-  animation-iteration-count: infinite;
-  animation-direction: alternate-reverse;
-  animation-timing-function: ease;
-}
-@keyframes bluranimation {
-  from { backdrop-filter: blur( 1px ); background-color: rgba(0,0,0,0.5); }
-  to { backdrop-filter: blur( 14px ); background-color: rgba(0,0,0,1); }
+  transition: all 1s ease-in-out;
 }
 .controls { display: flex; gap: 16px; }
+.timer { font-size: 132px; text-align: center; display: none; }
+
 #pause-btn,
 #resume-btn,
 #stop-btn {
@@ -47,10 +37,36 @@ html { scroll-behavior: smooth; }
   display: block;
 }
 .recording { position: relative; }
+.new-tag::after {
+  content: "";
+  position: absolute;
+  right: -100%;
+  height: 100%;
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.4);
+  transform: skewX(-30deg);
+  animation: wave 1.5s infinite ease-in-out;
+}
+.new-tag::before { content: "NEW"; position: relative; z-index: 1; }
+.new-tag {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: var(--bulma-primary);
+  color: #000;
+  padding: 0 14px;
+  border-radius: 4px;
+  overflow: hidden;
+  font-size: 10px;
+}
+@keyframes wave {
+  0% { left: -100%; }
+  100% { left: 200%; }
+}
 #recordings .size::before { content: '📦'; padding-right: 6px; }
 #recordings .time::before { content: '🕰️'; padding-right: 6px; }
 
-#recordings .column .card { transition: all 0.3s ease; cursor: pointer; position: relative; }
+#recordings .column .card { transition: all 0.3s ease; cursor: pointer; position: relative; animation-name: fadeIn; animation-timeline: view(0 20%); filter: blur(10px); }
 #recordings .column input[type=checkbox]:checked + .card { transform: scale(0.9); }
 #recordings .column input[type=checkbox]:checked + .card::after {
   position: absolute;
@@ -82,7 +98,7 @@ html { scroll-behavior: smooth; }
   left: 0;
   z-index: 9;
   transform: translateY(100%);
-  transition: all 1s ease;
+  transition: all 1s ease-in-out;
 }
 
 #delete-multiple > div {
@@ -95,8 +111,14 @@ html { scroll-behavior: smooth; }
 #main-content:has(input[type=checkbox]:checked) #delete-multiple { transform: translateY(0%); }
 #main-content:has(input[type=checkbox]:checked) .controls-wrapper { transform: translateY(100%); }
 
-.faqs .message { height: 100%; display: flex; flex-direction: column; }
-.faqs .column .message-body { height: 100%; }
+.faqs .message {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.faqs .column .message-body {
+  height: 100%;
+}
 
 
 

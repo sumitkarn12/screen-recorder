@@ -46,18 +46,19 @@
 	<section class="p-4 container" id="main-content">
 		<h2 class="title">Recordings</h2>
 		<div id="recordings" class="columns is-multiline"></div>
-		<div class="controls-wrapper">
-			<div class="controls container">
-				<button id="start-btn" class="button is-primary is-rounded is-fullwidth is-large">🎬 Start recording</button>
-				<button id="pause-btn" class="button is-fullwidth is-large">⏸️ Pause</button>
-				<button id="resume-btn" class="button is-fullwidth is-large">▶️ Resume</button>
-				<button id="stop-btn" class="button is-fullwidth is-large">⏹️ Stop</button>
-			</div>
-		</div>
-		<div id="delete-multiple">
-			<div class="container p-4 columns">
-				<button id="cancel-recording-selection" class="button column is-large is-rounded is-success is-one-third">Cancel</button>
-				<button id="delete-multiple-button" class="button column is-large is-rounded is-danger is-auto">Delete all</button>
+		<div class="controls-wrapper box mb-0">
+      <div class="timer">00:00:00</div>
+      <div class="controls container">
+        <button id="start-btn" class="button is-primary is-rounded is-fullwidth is-large">🎬 Start recording</button>
+        <button id="pause-btn" class="button is-fullwidth is-large">⏸️ Pause</button>
+        <button id="resume-btn" class="button is-fullwidth is-large">▶️ Resume</button>
+        <button id="stop-btn" class="button is-fullwidth is-large">⏹️ Stop</button>
+      </div>
+    </div>
+    <div id="delete-multiple">
+			<div class="container p-4">
+				<button id="cancel-recording-selection" class="button is-large is-rounded is-success">Cancel</button>
+				<button id="delete-multiple-button" class="button is-large is-rounded is-danger">Delete all</button>
 			</div>
 		</div>
 	</section>
