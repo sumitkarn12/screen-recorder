@@ -9,6 +9,12 @@ const historyContainer = document.getElementById('recordings');
 const cancelRecordingCardSelection = document.getElementById('cancel-recording-selection');
 const modal = document.querySelector('#playback-modal');
 const multiDeleteBtn = document.querySelector('#delete-multiple-button');
+const template = Handlebars.compile( document.querySelector('#recording-card-template').innerHTML );
+const parser = new DOMParser();
+
+alertify.defaults.glossary.title = "👋";
+alertify.defaults.notifier.closeButton = true;
+alertify.set("notifier", "position", "top-center");
 
 const HISOTY_KEY = `RECORDINGS`;
 const DEF_OF_NEW_RECORDING = 5 * 60 * 1000; // Not recorded more than 5 mins ago 
@@ -27,29 +33,6 @@ const dateFormatter = new Intl.DateTimeFormat(navigator.language, {
   timeStyle: "short"
 });
 
-function showToast(m, d = 5) {
-  Toastify({
-    text: m,
-    duration: d * 1000,
-    close: true
-  }).showToast();
-}
-
-async function estimateStorage() {
-  let details = "Storage Estimation API Not Supported";
-
-  if ('storage' in navigator && 'estimate' in navigator.storage) {
-    const { usage, quota } = await navigator.storage.estimate();
-    const percentUsed = (usage / quota * 100).toFixed(2);
-    const usageInMb = ((usage / (1024 * 1024))).toFixed(2);
-    const quotaInMb = ((quota / (1024 * 1024))).toFixed(2);
-
-    details = `${usageInMb} out of ${quotaInMb} MB used (${percentUsed}%)`;
-
-    return details
-  }
-}
-
 function updateControls(start_shown = 1, pause_shown = 0, resume_shown = 0, stop_shown = 0) {
   startBtn.style.display = (start_shown) ? "block" : "none";
   pauseBtn.style.display = (pause_shown) ? "block" : "none";
@@ -57,27 +40,6 @@ function updateControls(start_shown = 1, pause_shown = 0, resume_shown = 0, stop
   stopBtn.style.display = (stop_shown) ? "block" : "none";
 
   controlsWrapper.style.height = stop_shown?"100%": "auto";
-}
-
-async function delRecording(data) {
-  videoPlayback.src = null;
-
-  await db.recordings.delete(data.id);
-}
-
-async function renameRecording(data) {
-  let ts = data.title.split(".");
-  let t = data.title.replace("." + ts[ts.length - 1], "");
-  let p = prompt("Enter new name", t);
-  if (p.trim().length == 0) {
-    showToast("Title can't be empty.");
-    return null;
-  } else {
-    p = p.replaceAll(/\W/gi, "-").replaceAll(/-{2,}/gi, "-");
-    p = p.substring(0, 128);
-    p = p + "." + ts[ts.length - 1];
-    return await db.recordings.update(data.id, { title: p });
-  }
 }
 
 function createElement(nodeName, classes, textContent) {
@@ -100,7 +62,6 @@ function saveRecording(mimeType) {
   v.addEventListener("loadeddata", ev => {
     console.log( "LOADEDDATA", ev );
     let recordedAt = new Date();
-
     db.recordings.add({
       "blob": blob,
       "at": recordedAt,
@@ -111,17 +72,15 @@ function saveRecording(mimeType) {
       renderHistory();
       v.remove();
     });
-
     // Stop the media stream tracks
     stream.getTracks().forEach(track => track.stop());
-
     updateControls(1, 0, 0, 0);
   });
   v.src = videoURL;
 }
 
 function closeModal() {
-  modal.classList.remove("is-active");
+  document.querySelectorAll(".modal").forEach( el => el.classList.remove("is-active"));
   videoPlayback.pause();
 }
 
@@ -157,13 +116,139 @@ videoPlayback.addEventListener("resize", e => {
 
 cancelRecordingCardSelection.addEventListener("click", cancelRecordingCardSelector);
 
+document.querySelectorAll('.modal-close,.modal-background').forEach(el => {
+  el.addEventListener("click", closeModal);
+});
+
+multiDeleteBtn.addEventListener("click", async e => {
+  let selectedContent = document.querySelectorAll("input[type=checkbox]:checked");
+  let keys = Array.from(selectedContent).map(c => Number(c.value));
+  if ( keys.length == 0 ) return;
+  alertify.confirm(`Are your sure to delete ${keys.length} recording${(keys.length>1)?"s":""}?`,async function() {
+    await db.recordings.bulkDelete(keys).then( r=> {
+      alertify.success(`Deleted ${keys.length} recording${(keys.length > 1) ? "s" : ""}.` );
+      renderHistory();
+    });
+  });
+});
+
+startBtn.addEventListener('click', async () => {
+  try {
+    // Request access to the user's screen
+    stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+
+    // Set up the MediaRecorder
+    mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm; codecs=vp9' });
+
+    // Listen for data chunks and push them into the array
+    mediaRecorder.ondataavailable = (event) => {
+      if (event.data.size > 0) {
+        recordedChunks.push(event.data);
+      }
+    };
+
+    // When the recording stops, create a video Blob and a download link
+    mediaRecorder.onstop = saveRecording;
+
+    // Start the recording
+    mediaRecorder.start();
+
+    updateControls(0, 1, 0, 1);
+    timer.start();
+    timer.el.style.display = "block";
+  } catch (err) {
+    alertify.error( `Couldn't start recording.\n${err.message}` );
+    updateControls(1, 0, 0, 0);
+  }
+});
+
+pauseBtn.addEventListener('click', () => {
+  if (mediaRecorder && mediaRecorder.state == 'recording') {
+    mediaRecorder.pause();
+    updateControls(0, 0, 1, 1);
+    timer.stop();
+  }
+});
+
+resumeBtn.addEventListener('click', () => {
+  if (mediaRecorder && mediaRecorder.state == 'paused') {
+    mediaRecorder.resume();
+    updateControls(0, 1, 0, 1);
+    timer.start( false );
+  }
+});
+
+stopBtn.addEventListener('click', () => {
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+    mediaRecorder.stop();
+  }
+  // stopping & hiding timer code is in the saveRecording function
+});
+
+historyContainer.addEventListener( "click", e => {
+  if ( e.target.classList.contains("del")  ) {
+    videoPlayback.src = null;
+    alertify.confirm("Are you sure to delete this?", async () => {
+      await db.recordings.delete( Number(e.target.dataset.id) );
+      alertify.success("Deleted!");
+      const card = document.querySelector(`label[data-id='${e.target.dataset.id}']`);
+      card.style.transform = "scale(0)";
+      setTimeout(()=> card.remove(), 500);
+    });
+  } else if ( e.target.classList.contains("rename")  ) {
+    db.recordings.get(Number(e.target.dataset.id)).then( data => {
+      let ts = data.title.split(".");
+      let t = data.title.replace("." + ts[ts.length - 1], "");
+
+      alertify.prompt("Enter new name", t, async function (evt, p) {
+        if (p.trim().length == 0) {
+          alertify.error("Title can't be empty.");
+        } else {
+          p = p.replaceAll(/\W/gi, "-").replaceAll(/-{2,}/gi, "-");
+          p = p.substring(0, 128);
+          p = p + "." + ts[ts.length - 1];
+          await db.recordings.update(data.id, { title: p });
+          alertify.success('Renamed to ' + p);
+          const title = document.querySelector(`label[data-id='${e.target.dataset.id}'] .rec-title` );
+          title.textContent = p;
+        }
+      });
+    });
+
+
+  } else if ( e.target.classList.contains("preview")  ) {
+    db.recordings.get( Number(e.target.dataset.id) ).then( data => {
+      currentRecording = data;
+      videoPlayback.src = document.querySelector(`.download[data-id='${e.target.dataset.id}']`).href;
+      modal.classList.add("is-active");
+    });
+  }
+});
+
 document.addEventListener("keydown", e => {
+  // List of tag names to exclude
+  const excludedTags = ['INPUT', 'TEXTAREA', 'SELECT'];
+  if (excludedTags.includes(e.target.tagName)) {
+    // If the event originated from an excluded input field, do nothing.
+    return;
+  }
+
+  e.preventDefault();
+
   if (e.ctrlKey)
     console.log(e.keyCode, e.key);
 
-  if (e.key === '?' && e.shiftKey && !e.target.matches('input, textarea')) {
-    e.preventDefault(); // Prevent the '?' character from being typed
-    showShortcutsModal();
+  if (e.key === '?' && e.shiftKey) {
+    document.getElementById('shortcuts-modal').classList.add("is-active");
+    const shortcuts = [
+      { keys: 'Shift + ?', description: 'Show all keyboard shortcuts (this popup)' },
+      { keys: 'S', description: 'Start/Stop recording' },
+      { keys: 'P', description: 'Pause recording' },
+      { keys: 'R', description: 'Resume recording' },
+      { keys: 'Ctrl + A', description: 'Select all recording cards' },
+      { keys: 'Backspace', description: 'Delete selected recording cards' },
+      { keys: 'Esc', description: 'Close any active modal / Cancel card selection' }
+    ];
   }
 
 
@@ -194,153 +279,32 @@ document.addEventListener("keydown", e => {
   }
 });
 
-document.querySelectorAll('#playback-modal .modal-close, #playback-modal .modal-background').forEach(el => {
-  el.addEventListener("click", closeModal);
-});
-
-multiDeleteBtn.addEventListener("click", async e => {
-  let selectedContent = document.querySelectorAll("input[type=checkbox]:checked");
-  let keys = Array.from(selectedContent).map(c => Number(c.value));
-  if (keys.length && confirm(`Are your sure to delete ${keys.length} recordings?`)) {
-    let deletedDetails = await db.recordings.bulkDelete(keys);
-    renderHistory();
-  }
-});
-
-startBtn.addEventListener('click', async () => {
-  try {
-    // Request access to the user's screen
-    stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
-
-    // Set up the MediaRecorder
-    mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm; codecs=vp9' });
-
-    // Listen for data chunks and push them into the array
-    mediaRecorder.ondataavailable = (event) => {
-      if (event.data.size > 0) {
-        recordedChunks.push(event.data);
-      }
-    };
-
-    // When the recording stops, create a video Blob and a download link
-    mediaRecorder.onstop = saveRecording;
-
-    // Start the recording
-    mediaRecorder.start();
-
-    updateControls(0, 1, 0, 1);
-    timer.start();
-    timer.el.style.display = "block";
-  } catch (err) {
-    console.error("Error: " + err);
-    showToast("Error: Could not start recording.");
-    updateControls(1, 0, 0, 0);
-  }
-});
-
-pauseBtn.addEventListener('click', () => {
-  if (mediaRecorder && mediaRecorder.state == 'recording') {
-    mediaRecorder.pause();
-    updateControls(0, 0, 1, 1);
-    timer.stop();
-  }
-});
-
-resumeBtn.addEventListener('click', () => {
-  if (mediaRecorder && mediaRecorder.state == 'paused') {
-    mediaRecorder.resume();
-    updateControls(0, 1, 0, 1);
-    timer.start( false );
-  }
-});
-
-stopBtn.addEventListener('click', () => {
-  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-    mediaRecorder.stop();
-  }
-  // stopping & hiding timer code is in the saveRecording function
-});
-
 function renderHistory() {
   let current_date = null;
   historyContainer.querySelectorAll(".column").forEach(l => l.remove());
 
   db.recordings.orderBy("at").reverse().each(data => {
+    data.poster = `https://picsum.photos/seed/${data.id}/900/300.webp`;
+    data.size = (data.blob.size / (1024 * 1024)).toFixed(2)+"MB";
+    data.time = data.at.toLocaleTimeString(navigator.language);
+    let d = new Date(data.duration * 1000);
+    data.durationAsTime = d.toJSON().substring(11, 19)
     if (current_date != data.at.toDateString()) {
       current_date = data.at.toDateString();
       let li = createElement("div", ["category", "column", "is-full"], `🗓️ ${current_date}`);
       historyContainer.appendChild(li);
     }
 
-    let del = createElement("button", ["del", "card-footer-item"], "❌");
-    del.addEventListener("click", async r => {
-      r.preventDefault();
-      if (confirm("Are you sure to delete this?")) {
-        await delRecording(data);
-        renderHistory();
-      }
-    });
+    let node = parser.parseFromString(template(data), "text/html");
+    node = node.querySelector("label");
+    node.querySelector(".download").href = URL.createObjectURL( data.blob );
 
-    let preview = createElement("button", ["preview", "card-footer-item"], "👀");
-    preview.addEventListener("click", async r => {
-      currentRecording = data;
-      r.preventDefault();
-      videoPlayback.src = a.href;
-      modal.classList.add("is-active");
-    });
-
-    let rename = createElement("button", ["rename", "card-footer-item"], "✏️");
-    rename.addEventListener("click", async r => {
-      r.preventDefault();
-      let d = await renameRecording(data);
-      if (d) renderHistory();
-    });
-
-    let dropdownContainer = createElement("div", ["card-footer"], null);
-
-    let a = createElement("a", ["download", "card-footer-item"], `⬇️`);
-    a.href = URL.createObjectURL(data.blob);
-    a.download = data.title;
-
-    dropdownContainer.appendChild(del);
-    dropdownContainer.appendChild(rename);
-    dropdownContainer.appendChild(preview);
-    dropdownContainer.appendChild(a);
-
-    let card = createElement("div", ["card", "recording", "is-flex", "is-flex-direction-column"], null);
-    let cardContainer = createElement("div", ["card-content"], null);
-    cardContainer.appendChild(createElement("h3", ["rec-title", "subtitle", "block"], `${data.title}`));
-
-    const tags = createElement("div", ["tags"], null);
-    cardContainer.appendChild( tags );
-    tags.appendChild(createElement("span", ["size", "tag"], `${(data.blob.size / (1024 * 1024)).toFixed(2)}MB`));
-    tags.appendChild(createElement("span", ["time", "tag"], `${data.at.toLocaleTimeString(navigator.language)}`));
-
-    if ( data.dimension ) {
-      tags.appendChild(createElement("span", ["dimension", "tag"], `${data.dimension}`));
-    }
-    if ( data.duration ) {
-      tags.appendChild(createElement("span", ["duration", "tag"], `${data.duration}s`));
+    if ( (Date.now() - data.at.getTime()) < DEF_OF_NEW_RECORDING ) {
+      let newTag = createElement("div", ["new-tag"], null);
+      node.querySelector(".card-content").appendChild( newTag );
     }
 
-    card.appendChild(cardContainer);
-    if( (Date.now() - data.at.getTime()) <= DEF_OF_NEW_RECORDING )
-      card.appendChild( createElement("div", ["new-tag"], null) );
-    card.appendChild(dropdownContainer);
-
-    let checkbox = createElement("input", ["is-hidden", "recording-card-selector"], null);
-    checkbox.setAttribute("type", "checkbox");
-    checkbox.id = data.id;
-    checkbox.value = data.id;
-    let column = createElement("label", ["column", "is-full-mobile", "is-half-tablet", "is-one-third-desktop", "is-one-quarter-widescreen", "is-one-fifth-fullhd"], null);
-    column.setAttribute("for", data.id);
-    checkbox.setAttribute("type", "checkbox");
-    checkbox.id = data.id;
-    checkbox.value = data.id;
-    column.appendChild(checkbox);
-    column.appendChild(card);
-    column.dataset.id = data.id;
-    historyContainer.appendChild(column);
+    historyContainer.appendChild( node );
   });
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -369,111 +333,19 @@ if (!navigator.mediaDevices.getDisplayMedia) {
   document.querySelector("#main-content").style.display = "none";
   msg.innerText = "Your browser does not support screen recording feature.";
 } else {
-  setInterval(() => {
+  setInterval( async () => {
     msg.style.display = "block";
-    estimateStorage().then(m => {
-      msg.textContent = m;
-    });
-  }, 4 * 1000);
+    let details = "Storage Estimation API Not Supported";
+    if ('storage' in navigator && 'estimate' in navigator.storage) {
+      const { usage, quota } = await navigator.storage.estimate();
+      const percentUsed = (usage / quota * 100).toFixed(2);
+      const usageInMb = ((usage / (1024 * 1024))).toFixed(2);
+      const quotaInMb = ((quota / (1024 * 1024))).toFixed(2);
+      details = `${usageInMb} out of ${quotaInMb} MB used (${percentUsed}%)`;
+    }
+    msg.textContent = details;
+  }, 10);
 }
-
-/**
- * Global function to close the shortcuts modal.
- */
-function closeShortcutsModal() {
-  const modal = document.getElementById('shortcuts-modal');
-  if (modal) {
-    modal.classList.remove('is-active');
-    // For a cleaner DOM, we can remove the element after a short delay
-    setTimeout(() => {
-      if (modal.parentNode) {
-        modal.parentNode.removeChild(modal);
-      }
-    }, 150);
-  }
-}
-
-/**
- * Creates and displays the keyboard shortcuts modal popup using Bulma CSS.
- */
-function showShortcutsModal() {
-  // Prevent multiple modals from opening
-  if (document.getElementById('shortcuts-modal')) return;
-
-  // 1. Define the list of shortcuts
-  const shortcuts = [
-    { keys: 'Shift + ?', description: 'Show all keyboard shortcuts (this popup)' },
-    { keys: 'S', description: 'Start/Stop recording' },
-    { keys: 'P', description: 'Pause recording' },
-    { keys: 'R', description: 'Resume recording' },
-    { keys: 'Ctrl + A', description: 'Select all recording cards' },
-    { keys: 'Backspace', description: 'Delete selected recording cards' },
-    { keys: 'Esc', description: 'Close any active modal / Cancel card selection' }
-  ];
-
-  // 2. Create the Modal structure (Bulma: .modal)
-  const modal = document.createElement('div');
-  modal.id = 'shortcuts-modal';
-  modal.classList.add('modal', 'is-active'); // 'is-active' makes it visible immediately
-
-  // 3. Create the Modal Background (Bulma: .modal-background)
-  const background = document.createElement('div');
-  background.classList.add('modal-background');
-  // Close the modal when the background is clicked
-  background.onclick = closeShortcutsModal;
-  modal.appendChild(background);
-
-  // 4. Create the Modal Content (Bulma: .modal-content)
-  const content = document.createElement('div');
-  content.classList.add('modal-content', 'box'); // 'box' for a nice background/padding
-
-  // 5. Title
-  const title = document.createElement('p');
-  title.classList.add('title', 'is-4');
-  title.textContent = 'Keyboard Shortcuts';
-  content.appendChild(title);
-
-  // 6. Shortcuts Table/List
-  const table = document.createElement('table');
-  table.classList.add('table', 'is-striped', 'is-fullwidth');
-
-  const tbody = document.createElement('tbody');
-
-  shortcuts.forEach(shortcut => {
-    const row = document.createElement('tr');
-
-    // Keys Column
-    const keysCell = document.createElement('td');
-    // Use the Bulma tag component for a key-like visual
-    keysCell.innerHTML = `<span class="tag is-info is-light">${shortcut.keys}</span>`;
-    keysCell.style.width = '150px'; // Give the keys column a fixed width
-    row.appendChild(keysCell);
-
-    // Description Column
-    const descCell = document.createElement('td');
-    descCell.textContent = shortcut.description;
-    row.appendChild(descCell);
-
-    tbody.appendChild(row);
-  });
-
-  table.appendChild(tbody);
-  content.appendChild(table);
-
-  // 7. Append Content to Modal
-  modal.appendChild(content);
-
-  // 8. Close Button (Bulma: .modal-close)
-  const closeBtn = document.createElement('button');
-  closeBtn.classList.add('modal-close', 'is-large');
-  closeBtn.setAttribute('aria-label', 'close');
-  closeBtn.onclick = closeShortcutsModal;
-  modal.appendChild(closeBtn);
-
-  // 9. Append everything to the body
-  document.body.appendChild(modal);
-}
-
 
 if (typeof navigator.serviceWorker !== 'undefined') {
   navigator.serviceWorker.register('sw.js')

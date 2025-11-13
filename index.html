@@ -3,30 +3,31 @@
 
 <head>
 	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
 	<title>Free Online Screen Recorder | Record Your Screen & Audio</title>
 	<meta name="description"
-		content="Our free online screen recorder is a simple and effective tool to capture your screen and audio.">
-	<meta property="og:title" content="Free Online Screen Recorder | Record Your Screen & Audio - IDKEY">
+		content="Our free online screen recorder is a simple and effective tool to capture your screen and audio." />
+	<meta property="og:title" content="Free Online Screen Recorder | Record Your Screen & Audio - IDKEY" />
 	<meta property="og:description"
-		content="Easily record your screen and microphone for free, right from your browser. Perfect for tutorials, presentations, and more.">
-	<meta property="og:url" content="https://recorder.idkey.in/">
-	<meta property="og:type" content="website">
-
+		content="Easily record your screen and microphone for free, right from your browser. Perfect for tutorials, presentations, and more." />
+	<meta property="og:url" content="https://recorder.idkey.in/" />
+	<meta property="og:type" content="website" />
 	<meta property="og:image" content="https://record.idkey.in/banner.jpg" />
 
 	<script src="https://unpkg.com/dexie/dist/dexie.js"></script>
-	<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" />
-	<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+	<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css" />
+	<script src="//cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
 
 	<link rel="shortcut icon" href="https://record.idkey.in/logo.jpg" type="image/x-icon" />
 
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css" />
-	<link rel="stylesheet" href="/style.css">
+	<link rel="stylesheet" href="/style.css" />
+
+	<script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
 
 	<link rel="manifest" href="/manifest.json" />
-
 </head>
 
 <body class="is-primary-light">
@@ -47,15 +48,15 @@
 		<h2 class="title">Recordings</h2>
 		<div id="recordings" class="columns is-multiline"></div>
 		<div class="controls-wrapper box mb-0">
-      <div class="timer">00:00:00</div>
-      <div class="controls container">
-        <button id="start-btn" class="button is-primary is-rounded is-fullwidth is-large">🎬 Start recording</button>
-        <button id="pause-btn" class="button is-fullwidth is-large">⏸️ Pause</button>
-        <button id="resume-btn" class="button is-fullwidth is-large">▶️ Resume</button>
-        <button id="stop-btn" class="button is-fullwidth is-large">⏹️ Stop</button>
-      </div>
-    </div>
-    <div id="delete-multiple">
+			<div class="timer">00:00:00</div>
+			<div class="controls container">
+				<button id="start-btn" class="button is-primary is-rounded is-fullwidth is-large">🎬 Start recording</button>
+				<button id="pause-btn" class="button is-fullwidth is-large">⏸️ Pause</button>
+				<button id="resume-btn" class="button is-fullwidth is-large">▶️ Resume</button>
+				<button id="stop-btn" class="button is-fullwidth is-large">⏹️ Stop</button>
+			</div>
+		</div>
+		<div id="delete-multiple">
 			<div class="container p-4">
 				<button id="cancel-recording-selection" class="button is-large is-rounded is-success">Cancel</button>
 				<button id="delete-multiple-button" class="button is-large is-rounded is-danger">Delete all</button>
@@ -67,7 +68,7 @@
 		<div class="modal-background"></div>
 		<button class="is-large modal-close"></button>
 		<div class="modal-content is-flex is-justify-content-centered is-align-items-centered">
-      <video id="video-playback" controls></video>
+			<video id="video-playback" controls></video>
 		</div>
 	</div>
 
@@ -489,6 +490,75 @@
 	</footer>
 
 	<div id="footer-spacer"></div>
+
+	<script id="recording-card-template" type="text/x-handlebars-template">
+    <label class="column is-full-mobile is-half-tablet is-one-third-desktop" for="{{id}}" data-id="{{id}}">
+        <input class="is-hidden recording-card-selector" type="checkbox" id="{{id}}" value="{{id}}" />
+        <div class="card recording is-flex is-flex-direction-column">
+          <div class="card-image">
+            <figure class="image is-3by1">
+              <img src="{{poster}}" alt="Placeholder image" />
+            </figure>
+          </div>
+          <div class="card-content">
+            <h3 class="rec-title subtitle block">{{title}}</h3>
+            <div class="tags">
+              <span class="size tag">{{size}}</span>
+              <span class="time tag">{{time}}</span>
+              <span class="dimension tag">{{dimension}}</span>
+              <span class="duration tag">{{durationAsTime}}</span>
+            </div>
+          </div>
+          <div class="card-footer">
+            <button class="del card-footer-item" data-id="{{id}}">❌</button>
+            <button class="rename card-footer-item" data-id="{{id}}">✏️</button>
+            <button class="preview card-footer-item" data-id="{{id}}">▶️</button>
+            <a class="download card-footer-item" download="{{title}}" data-id="{{id}}">⬇️</a>
+          </div>
+        </div>
+      </label>
+	</script>
+
+
+<div id="shortcuts-modal" class="modal">
+	<div class="modal-background"></div>
+	<div class="modal-content box">
+		<p class="title is-4">Keyboard Shortcuts</p>
+		<table class="table is-striped is-fullwidth">
+			<tbody>
+				<tr>
+					<td style="width: 150px;"><span class="tag is-info is-light">Shift + ?</span></td>
+					<td>Show all keyboard shortcuts (this popup)</td>
+				</tr>
+				<tr>
+					<td style="width: 150px;"><span class="tag is-info is-light">S</span></td>
+					<td>Start/Stop recording</td>
+				</tr>
+				<tr>
+					<td style="width: 150px;"><span class="tag is-info is-light">P</span></td>
+					<td>Pause recording</td>
+				</tr>
+				<tr>
+					<td style="width: 150px;"><span class="tag is-info is-light">R</span></td>
+					<td>Resume recording</td>
+				</tr>
+				<tr>
+					<td style="width: 150px;"><span class="tag is-info is-light">Ctrl + A</span></td>
+					<td>Select all recording cards</td>
+				</tr>
+				<tr>
+					<td style="width: 150px;"><span class="tag is-info is-light">Backspace</span></td>
+					<td>Delete selected recording cards</td>
+				</tr>
+				<tr>
+					<td style="width: 150px;"><span class="tag is-info is-light">Esc</span></td>
+					<td>Close any active modal / Cancel card selection</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+  <button class="modal-close is-large" aria-label="close"></button>
+</div>
 
 	<script src="/script.js"></script>
 </body>
