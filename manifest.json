@@ -5,14 +5,10 @@
     "start_url": "/?pwa=1",
     "display": "standalone",
     "orientation": "portrait",
-    "display_override": [
-        "window-controls-overlay",
-        "standalone",
-        "browser"
-    ],
+    "display_override": ["standalone"],
     "id": "https://record.idkey.in",
-    "background_color": "#f1f5f9",
-    "theme_color": "#209CEE",
+    "background_color": "#fff",
+    "theme_color": "#fff",
     "icons": [
         {
             "src": "/icons/windows11/SmallTile.scale-100.png",
