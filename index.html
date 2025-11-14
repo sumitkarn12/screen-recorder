@@ -492,31 +492,31 @@
 	<div id="footer-spacer"></div>
 
 	<script id="recording-card-template" type="text/x-handlebars-template">
-    <label class="column is-full-mobile is-half-tablet is-one-third-desktop" for="{{id}}" data-id="{{id}}">
-        <input class="is-hidden recording-card-selector" type="checkbox" id="{{id}}" value="{{id}}" />
-        <div class="card recording is-flex is-flex-direction-column">
-          <div class="card-image">
-            <figure class="image is-3by1">
-              <img src="{{poster}}" alt="Placeholder image" />
-            </figure>
-          </div>
-          <div class="card-content">
-            <h3 class="rec-title subtitle block">{{title}}</h3>
-            <div class="tags">
-              <span class="size tag">{{size}}</span>
-              <span class="time tag">{{time}}</span>
-              <span class="dimension tag">{{dimension}}</span>
-              <span class="duration tag">{{durationAsTime}}</span>
-            </div>
-          </div>
-          <div class="card-footer">
-            <button class="del card-footer-item" data-id="{{id}}">❌</button>
-            <button class="rename card-footer-item" data-id="{{id}}">✏️</button>
-            <button class="preview card-footer-item" data-id="{{id}}">▶️</button>
-            <a class="download card-footer-item" download="{{title}}" data-id="{{id}}">⬇️</a>
-          </div>
-        </div>
-      </label>
+    <label class="column is-full-mobile is-half-tablet is-one-third-desktop" for="{{id}}" data-id="{{id}}" />
+			<input class="is-hidden recording-card-selector" type="checkbox" id="{{id}}" value="{{id}}" />
+			<div class="card recording is-flex is-flex-direction-column">
+				<div class="card-image">
+					<figure class="image is-3by1">
+						<img src="{{poster}}" alt="Placeholder image" />
+					</figure>
+				</div>
+				<div class="card-content">
+					<h3 class="rec-title subtitle block">{{title}}</h3>
+					<div class="tags">
+						<span class="size tag">{{size}}</span>
+						<span class="time tag">{{time}}</span>
+						<span class="dimension tag">{{dimension}}</span>
+						<span class="duration tag">{{durationAsTime}}</span>
+					</div>
+				</div>
+				<div class="card-footer">
+					<button class="del card-footer-item" data-id="{{id}}">❌</button>
+					<button class="rename card-footer-item" data-id="{{id}}">✏️</button>
+					<button class="preview card-footer-item" data-id="{{id}}">▶️</button>
+					<a class="download card-footer-item" download="{{title}}" data-id="{{id}}">⬇️</a>
+				</div>
+			</div>
+		</label>
 	</script>
 
 

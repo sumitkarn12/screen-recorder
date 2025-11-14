@@ -16,14 +16,14 @@ alertify.defaults.glossary.title = "👋";
 alertify.defaults.notifier.closeButton = true;
 alertify.set("notifier", "position", "top-center");
 
-const HISOTY_KEY = `RECORDINGS`;
+const HISTORY_KEY = `RECORDINGS`;
 const DEF_OF_NEW_RECORDING = 5 * 60 * 1000; // Not recorded more than 5 mins ago 
 
 let mediaRecorder, stream;
 let recordedChunks = [];
 let currentRecording = null;
 
-const db = new Dexie(HISOTY_KEY);
+const db = new Dexie(HISTORY_KEY);
 db.version(1).stores({
   recordings: `++id, title, blob, at`,
 });
