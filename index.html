@@ -23,6 +23,7 @@
 	<link rel="shortcut icon" href="https://record.idkey.in/logo.jpg" type="image/x-icon" />
 
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 	<link rel="stylesheet" href="/style.css" />
 
 	<script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
@@ -45,24 +46,31 @@
 	</div>
 
 	<section class="p-4 container" id="main-content">
-		<h2 class="title">Recordings</h2>
 		<div id="recordings" class="columns is-multiline"></div>
-		<div class="controls-wrapper box mb-0">
-			<div class="timer">00:00:00</div>
-			<div class="controls container">
-				<button id="start-btn" class="button is-primary is-rounded is-fullwidth is-large">🎬 Start recording</button>
-				<button id="pause-btn" class="button is-fullwidth is-large">⏸️ Pause</button>
-				<button id="resume-btn" class="button is-fullwidth is-large">▶️ Resume</button>
-				<button id="stop-btn" class="button is-fullwidth is-large">⏹️ Stop</button>
+
+		<div class="controls">
+			<div class="container">
+				<div class="recorder p-4 b-card is-flex is-justify-content-center is-flex-direction-column">
+					<h1 class="timer has-text-centered is-unselectable">00:00:00</h1>
+					<div class="grid buttons are-large">
+						<button id="start-btn" class="cell is-primary button"><span class="icon"><i class="fa fa-camera"></i></span><span>Start recording</span></button>
+						<button id="pause-btn" class="cell button"><span class="icon"><i class="fa fa-pause"></i></span><span>Pause</span></button>
+						<button id="resume-btn" class="cell button"><span class="icon"><i class="fa fa-play"></i></span><span>Resume</span></button>
+						<button id="stop-btn" class="cell button"><span class="icon"><i class="fa fa-stop"></i></span><span>Stop</span></button>
+					</div>
+				</div>
+				<div class="multi-action p-4 b-card">
+					<div class="grid">
+						<button id="cancel-recording-selection" class="button cell">Cancel</button>
+						<button id="rename-multiple-button" class="button cell">✏️ Rename</button>
+						<button id="delete-multiple-button" class="button is-danger cell">🗑️ Delete</button>
+					</div>
+				</div>
 			</div>
 		</div>
-		<div id="delete-multiple">
-			<div class="container p-4">
-				<button id="cancel-recording-selection" class="button is-large is-rounded is-success">Cancel</button>
-				<button id="delete-multiple-button" class="button is-large is-rounded is-danger">Delete all</button>
-			</div>
-		</div>
+
 	</section>
+
 
 	<div class="modal" id="playback-modal">
 		<div class="modal-background"></div>
@@ -492,73 +500,74 @@
 	<div id="footer-spacer"></div>
 
 	<script id="recording-card-template" type="text/x-handlebars-template">
-    <label class="column is-full-mobile is-half-tablet is-one-third-desktop" for="{{id}}" data-id="{{id}}" />
+		<label class="column is-full-mobile is-half-tablet is-one-third-desktop recording-wrapper" for="{{id}}" data-id="{{id}}" />
 			<input class="is-hidden recording-card-selector" type="checkbox" id="{{id}}" value="{{id}}" />
-			<div class="card recording is-flex is-flex-direction-column">
+			<div class="card recording is-flex is-flex-direction-column is-clickable">
 				<div class="card-image">
-					<figure class="image is-3by1">
+					<figure class="image is-3by1 is-skeleton">
 						<img src="{{poster}}" alt="Placeholder image" />
 					</figure>
 				</div>
 				<div class="card-content">
+      		<div class="icon"><i class="fa fa-video-camera"></i></div>
 					<h3 class="rec-title subtitle block">{{title}}</h3>
 					<div class="tags">
-						<span class="size tag">{{size}}</span>
-						<span class="time tag">{{time}}</span>
-						<span class="dimension tag">{{dimension}}</span>
-						<span class="duration tag">{{durationAsTime}}</span>
+						<span class="size tag"><span class="icon"><i class="fa fa-cube"></i></span><span>{{size}}</span></span>
+						<span class="time tag"><span class="icon"><i class="fa fa-clock-o"></i></span><span>{{time}}</span></span>
+						<span class="dimension tag"><span class="icon"><i class="fa fa-arrows-alt"></i></span><span>{{dimension}}</span></span>
+						<span class="duration tag"><span class="icon"><i class="fa fa-play-circle"></i></span><span>{{durationAsTime}}</span></span>
 					</div>
 				</div>
 				<div class="card-footer">
-					<button class="del card-footer-item" data-id="{{id}}">❌</button>
-					<button class="rename card-footer-item" data-id="{{id}}">✏️</button>
-					<button class="preview card-footer-item" data-id="{{id}}">▶️</button>
-					<a class="download card-footer-item" download="{{title}}" data-id="{{id}}">⬇️</a>
+					<button class="del card-footer-item" data-id="{{id}}"><span class="icon"><i class="fa fa-trash"></i></span></button>
+					<button class="rename card-footer-item" data-id="{{id}}"><span class="icon"><i class="fa fa-pencil"></i></span></button>
+					<button class="preview card-footer-item" data-id="{{id}}"><span class="icon"><i class="fa fa-play"></i></span></button>
+					<a class="download card-footer-item" download="{{title}}" data-id="{{id}}"><span class="icon"><i class="fa fa-download"></i></span></a>
 				</div>
 			</div>
 		</label>
 	</script>
 
 
-<div id="shortcuts-modal" class="modal">
-	<div class="modal-background"></div>
-	<div class="modal-content box">
-		<p class="title is-4">Keyboard Shortcuts</p>
-		<table class="table is-striped is-fullwidth">
-			<tbody>
-				<tr>
-					<td style="width: 150px;"><span class="tag is-info is-light">Shift + ?</span></td>
-					<td>Show all keyboard shortcuts (this popup)</td>
-				</tr>
-				<tr>
-					<td style="width: 150px;"><span class="tag is-info is-light">S</span></td>
-					<td>Start/Stop recording</td>
-				</tr>
-				<tr>
-					<td style="width: 150px;"><span class="tag is-info is-light">P</span></td>
-					<td>Pause recording</td>
-				</tr>
-				<tr>
-					<td style="width: 150px;"><span class="tag is-info is-light">R</span></td>
-					<td>Resume recording</td>
-				</tr>
-				<tr>
-					<td style="width: 150px;"><span class="tag is-info is-light">Ctrl + A</span></td>
-					<td>Select all recording cards</td>
-				</tr>
-				<tr>
-					<td style="width: 150px;"><span class="tag is-info is-light">Backspace</span></td>
-					<td>Delete selected recording cards</td>
-				</tr>
-				<tr>
-					<td style="width: 150px;"><span class="tag is-info is-light">Esc</span></td>
-					<td>Close any active modal / Cancel card selection</td>
-				</tr>
-			</tbody>
-		</table>
+	<div id="shortcuts-modal" class="modal">
+		<div class="modal-background"></div>
+		<div class="modal-content box">
+			<p class="title is-4">Keyboard Shortcuts</p>
+			<table class="table is-striped is-fullwidth">
+				<tbody>
+					<tr>
+						<td style="width: 150px;"><span class="tag is-info is-light">?</span></td>
+						<td>Show all keyboard shortcuts (this popup)</td>
+					</tr>
+					<tr>
+						<td style="width: 150px;"><span class="tag is-info is-light">S</span></td>
+						<td>Start/Stop recording</td>
+					</tr>
+					<tr>
+						<td style="width: 150px;"><span class="tag is-info is-light">P</span></td>
+						<td>Pause recording</td>
+					</tr>
+					<tr>
+						<td style="width: 150px;"><span class="tag is-info is-light">R</span></td>
+						<td>Resume recording</td>
+					</tr>
+					<tr>
+						<td style="width: 150px;"><span class="tag is-info is-light">Ctrl + A</span></td>
+						<td>Select all recording cards</td>
+					</tr>
+					<tr>
+						<td style="width: 150px;"><span class="tag is-info is-light">Backspace</span></td>
+						<td>Delete selected recording cards</td>
+					</tr>
+					<tr>
+						<td style="width: 150px;"><span class="tag is-info is-light">Esc</span></td>
+						<td>Close any active modal / Cancel card selection</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		<button class="modal-close is-large" aria-label="close"></button>
 	</div>
-  <button class="modal-close is-large" aria-label="close"></button>
-</div>
 
 	<script src="/script.js"></script>
 </body>
