@@ -1,5 +1,8 @@
 html { scroll-behavior: smooth; }
 #footer-spacer { margin-bottom: 120px; }
+#view-options { gap: 12px;}
+#is-reversed-el #is-reversed-val { display: none;}
+#is-reversed-el #is-reversed-val:checked + label { background-color: var(--bulma-primary); }
 
 .b-card {
   border: 1px solid #fff;
@@ -18,9 +21,9 @@ html { scroll-behavior: smooth; }
 #main-content .timer { font-size: 122px; text-shadow: 0 0 12px #000; }
 #main-content .card-footer { filter: blur(0); transition: all 1s ease-in-out; }
 
-#main-content:has(input[type=checkbox]:checked) .controls .recorder { transform: translateY(100%); }
-#main-content:has(input[type=checkbox]:checked) .controls .multi-action { transform: translateY(0%); }
-#main-content:has(input[type=checkbox]:checked) .card-footer { filter: blur(3px); pointer-events: none; }
+#main-content:has(.recording-card-selector:checked) .controls .recorder { transform: translateY(100%); }
+#main-content:has(.recording-card-selector:checked) .controls .multi-action { transform: translateY(0%); }
+#main-content:has(.recording-card-selector:checked) .card-footer { filter: blur(3px); pointer-events: none; }
 
 #video-playback { max-height: 80vh; max-width: 100%; margin: 0 auto; }
 #playback-modal .modal-close { background-color: var(--bulma-primary); z-index: 1; }
@@ -55,8 +58,8 @@ html { scroll-behavior: smooth; }
 #recordings .recording-wrapper:hover { transform: translateY(-2px); }
 #recordings .recording-wrapper { transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55); }
 #recordings .recording-wrapper .card { height: 100%; transition: all 0.3s ease; }
-#recordings .recording-wrapper input[type=checkbox]:checked+.card { transform: scale(0.9); }
-#recordings .recording-wrapper input[type=checkbox]:checked+.card::after {
+#recordings .recording-wrapper .recording-card-selector:checked+.card { transform: scale(0.9); }
+#recordings .recording-wrapper .recording-card-selector:checked+.card::after {
   position: absolute;
   top: -15px;
   left: -15px;

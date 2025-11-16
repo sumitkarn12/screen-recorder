@@ -2,7 +2,6 @@ const startBtn = document.getElementById('start-btn');
 const pauseBtn = document.getElementById('pause-btn');
 const resumeBtn = document.getElementById('resume-btn');
 const stopBtn = document.getElementById('stop-btn');
-const controlsWrapper = document.querySelector('.controls-wrapper');
 const recorderEl = document.querySelector('#main-content .recorder');
 const msg = document.getElementById('msg');
 const videoPlayback = document.getElementById('video-playback');
@@ -11,8 +10,11 @@ const cancelRecordingCardSelection = document.getElementById('cancel-recording-s
 const modal = document.querySelector('#playback-modal');
 const multiDeleteBtn = document.querySelector('#delete-multiple-button');
 const multiRenameBtn = document.querySelector('#rename-multiple-button');
+const orderByEl = document.querySelector('#order-by-el');
+const isReversedEl = document.querySelector('#is-reversed-val');
 const template = Handlebars.compile(document.querySelector('#recording-card-template').innerHTML);
 const parser = new DOMParser();
+const VIEW = { isReversed: true, orderBy: "at" }
 
 alertify.defaults.glossary.title = "🖥️";
 alertify.defaults.notifier.closeButton = true;
@@ -21,15 +23,16 @@ alertify.set("notifier", "position", "top-center");
 const HISTORY_KEY = `RECORDINGS`;
 const VIDEO_EXT = `webm`;
 const DEF_OF_NEW_RECORDING = 5 * 60 * 1000; // Not recorded more than 5 mins ago 
+const APP_URL = location.hostname;
 
 let mediaRecorder, stream;
 let recordedChunks = [];
 let currentRecording = null;
 
 const db = new Dexie(HISTORY_KEY);
-db.version(1).stores({
-  recordings: `++id, title, blob, at`,
-});
+db.version(1).stores({ recordings: `++id, title, blob, at` });
+db.version(2).stores({ recordings: "++id, title, blob, at, duration, dimension" });
+db.version(3).stores({ recordings: "++id, title, blob, size, at, duration, dimension" });
 
 async function estimateStorage() {
   let details = "Storage Estimation API Not Supported.";
@@ -42,11 +45,6 @@ async function estimateStorage() {
   }
   return details;
 }
-
-const dateFormatter = new Intl.DateTimeFormat(navigator.language, {
-  dateStyle: "medium",
-  timeStyle: "short"
-});
 
 function updateControls(start_shown = 1, pause_shown = 0, resume_shown = 0, stop_shown = 0) {
   timer.el.style.display = (!start_shown) ? "block" : "none";
@@ -75,13 +73,13 @@ function saveRecording(mimeType) {
 
   let v = document.createElement("video");
   v.addEventListener("loadeddata", ev => {
-    console.log("LOADEDDATA", ev);
     let recordedAt = new Date();
     db.recordings.add({
       "blob": blob,
+      "size": blob.size,
       "at": recordedAt,
-      "title": `record.idkey.in-${dateFormatter.format(new Date()).replaceAll(/\W/gi, '-')}.${VIDEO_EXT}`,
-      "duration": Math.round(v.duration),
+      "title": `${APP_URL}-${recordedAt.toLocaleString("en-GB").replaceAll(/\W/gi, '')}.${VIDEO_EXT}`,
+      "duration": Math.round(v.duration), // In seconds
       "dimension": v.videoWidth + "x" + v.videoHeight
     }).then(a => {
       renderHistory();
@@ -105,7 +103,14 @@ function rename( keys, callback ) {
     if (recs.length == 0) throw new Error("Nothing to be renamed");
     alertify.prompt(`Enter new name`, (recs.length == 1)?recs[0].title.replace( "."+VIDEO_EXT, ""):"", async function (evt, p) {
       let renamedRecs = recs.map((r, i) => {
-        p = p.replaceAll(/\W/gi, "-").replaceAll(/-{2,}/gi, "-");
+
+        // Check if input is a non-empty string
+        if (typeof p !== 'string' || p.length === 0) {
+          p = "New Recording"
+        }
+
+        p = p.replace(/[^0-9a-zA-Z\-\._]/g, ' ');
+        p = p.replace(/\s+/g, ' ').trim(); // Replaced consecutive spaces with one space
         p = p.substring(0, 128);
         r.title = p + ((recs.length > 1)?` - ${i}`:"")+`.${VIDEO_EXT}`;
         return r;
@@ -150,6 +155,16 @@ videoPlayback.addEventListener("resize", e => {
       console.log(r, "Record updated")
     });
 })
+
+orderByEl.addEventListener( "change", el => {
+  VIEW.orderBy = el.target.value;
+  renderHistory();
+});
+
+isReversedEl.addEventListener( "change", el => {
+  VIEW.isReversed = el.target.checked;
+  renderHistory();
+});
 
 cancelRecordingCardSelection.addEventListener("click", e=> {
   document.querySelectorAll(".recording-card-selector").forEach(el => {
@@ -213,7 +228,10 @@ startBtn.addEventListener('click', async () => {
     timer.start();
     timer.el.style.display = "block";
   } catch (err) {
-    alertify.error(`Couldn't start recording.\n${err.message}`);
+    if (err.message.toLowerCase() != "permission denied by user" ) {
+      console.error( err )
+      alertify.error(`Couldn't start recording.\n${err.message}`, 10);
+    }
     updateControls(1, 0, 0, 0);
   }
 });
@@ -316,7 +334,10 @@ function renderHistory() {
   let current_date = null;
   historyContainer.querySelectorAll(".column").forEach(l => l.remove());
 
-  db.recordings.orderBy("at").reverse().each(data => {
+  let localDB = db.recordings.orderBy( VIEW.orderBy );
+  localDB = VIEW.isReversed?localDB.reverse():localDB;
+
+  localDB.each(data => {
     data.poster = `https://picsum.photos/seed/${data.id}/900/300.webp`;
     data.size = (data.blob.size / (1024 * 1024)).toFixed(2) + "MB";
     data.time = data.at.toLocaleTimeString(navigator.language);
@@ -368,6 +389,7 @@ renderHistory();
 if (!navigator.mediaDevices.getDisplayMedia) {
   document.querySelector("#main-content").style.display = "none";
   msg.innerText = "Your browser does not support screen recording feature.";
+  msg.parentNode.classList.add("is-danger");
 } else {
   // Auto refresh available storage
   setInterval(async () => {
