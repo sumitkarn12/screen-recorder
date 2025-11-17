@@ -9,8 +9,7 @@
 	<meta name="description"
 		content="Our free online screen recorder is a simple and effective tool to capture your screen and audio." />
 	<meta property="og:title" content="Free Online Screen Recorder | Record Your Screen & Audio - IDKEY" />
-	<meta property="og:description"
-		content="Easily record your screen and microphone for free, right from your browser. Perfect for tutorials, presentations, and more." />
+	<meta property="og:description" content="Easily record your screen and microphone for free, right from your browser. Perfect for tutorials, presentations, and more." />
 	<meta property="og:url" content="https://recorder.idkey.in/" />
 	<meta property="og:type" content="website" />
 	<meta property="og:image" content="https://record.idkey.in/banner.jpg" />
@@ -31,12 +30,11 @@
 	<link rel="manifest" href="/manifest.json" />
 </head>
 
-<body class="is-primary-light">
-
+<body>
 	<div class="container">
 		<section class="hero">
 			<div class="hero-body">
-				<h1 class="title is-1">Record your screen</h1>
+				<h1 class="title is-1">🖥️ Record your screen</h1>
 				<p class="subtitle">Record your screen with no timelimit for free with audio.</p>
 				<article class="message mb-0">
 					<p class="message-body" id="msg">Loading available recording space...</p>
@@ -46,54 +44,64 @@
 	</div>
 
 	<section class="p-4 container" id="main-content">
-
     <div id="view-options" class="is-flex mb-4">
-      <div class="select is-rounded">
-        <select id="order-by-el">
-          <option value="at">Recorded at</option>
-          <option value="title">Name</option>
-          <option value="size">Size</option>
-          <option value="duration">Duration</option>
-          <option value="dimension">Dimension</option>
-        </select>
+      <div class="control has-icons-left">
+        <div class="select is-rounded">
+          <select id="recording-card-type">
+            <option value="with-image">With image</option>
+            <option value="without-image">Without image</option>
+          </select>
+        </div>
+        <div class="icon is-left">
+          <i class="fa fa-image"></i>
+        </div>
+      </div>
+      <div class="control has-icons-left">
+        <div class="select is-rounded">
+          <select id="order-by-el">
+            <option value="at">Recorded at</option>
+            <option value="title">Name</option>
+            <option value="size">Size</option>
+            <option value="duration">Duration</option>
+            <option value="dimension">Dimension</option>
+          </select>
+        </div>
+        <div class="icon is-left">
+          <i class="fa fa-sort"></i>
+        </div>
       </div>
       <div class="field" id="is-reversed-el">
         <input type="checkbox" id="is-reversed-val" checked />
         <label for="is-reversed-val" class="button is-rounded is-clickable">Reversed</label>
       </div>
     </div>
-
-
 		<div id="recordings" class="columns is-multiline"></div>
-
 		<div class="controls">
 			<div class="container">
 				<div class="recorder p-4 b-card is-flex is-justify-content-center is-flex-direction-column">
 					<h1 class="timer has-text-centered is-unselectable">00:00:00</h1>
 					<div class="grid buttons are-large">
-						<button id="start-btn" class="cell is-primary button"><span class="icon"><i class="fa fa-camera"></i></span><span>Start recording</span></button>
-						<button id="pause-btn" class="cell button"><span class="icon"><i class="fa fa-pause"></i></span><span>Pause</span></button>
-						<button id="resume-btn" class="cell button"><span class="icon"><i class="fa fa-play"></i></span><span>Resume</span></button>
-						<button id="stop-btn" class="cell button"><span class="icon"><i class="fa fa-stop"></i></span><span>Stop</span></button>
+						<button accesskey="S" id="start-btn" class="cell is-primary button"><span class="icon"><i class="fa fa-camera"></i></span><span>Start recording</span></button>
+						<button accesskey="P" id="pause-btn" class="cell button"><span class="icon"><i class="fa fa-pause"></i></span><span>Pause</span></button>
+						<button accesskey="R" id="resume-btn" class="cell button"><span class="icon"><i class="fa fa-play"></i></span><span>Resume</span></button>
+						<button accesskey="S" id="stop-btn" class="cell button"><span class="icon"><i class="fa fa-stop"></i></span><span>Stop</span></button>
 					</div>
 				</div>
 				<div class="multi-action p-4 b-card">
 					<div class="grid">
-						<button id="cancel-recording-selection" class="button cell">Cancel</button>
-						<button id="rename-multiple-button" class="button cell"><span class="icon"><i class="fa fa-pencil"></i></span><span>Rename</span></button>
-						<button id="delete-multiple-button" class="button is-danger cell"><span class="icon"><i class="fa fa-trash"></i></span><span>Delete</span></button>
+						<button accesskey="ESC" id="cancel-recording-selection" class="button cell">Cancel</button>
+						<button accesskey="R" id="rename-multiple-button" class="button cell"><span class="icon"><i class="fa fa-pencil"></i></span><span>Rename</span></button>
+						<button accesskey="DELETE" id="delete-multiple-button" class="button is-danger cell"><span class="icon"><i class="fa fa-trash"></i></span><span>Delete</span></button>
 					</div>
 				</div>
 			</div>
 		</div>
-
 	</section>
-
 
 	<div class="modal" id="playback-modal">
 		<div class="modal-background"></div>
 		<button class="is-large modal-close"></button>
-		<div class="modal-content is-flex is-justify-content-centered is-align-items-centered">
+		<div class="modal-content is-flex is-justify-content-center is-align-items-center">
 			<video id="video-playback" controls></video>
 		</div>
 	</div>
@@ -514,6 +522,8 @@
 			<a href="http://doodle.idkey.in/">Annotate on Image</a>
 		</div>
 	</footer>
+  
+  <p id="hit-count" class="has-text-centered is-size-7">Page Hit: <span id="page-hit-count">0</span></p>
 
 	<div id="footer-spacer"></div>
 
@@ -522,7 +532,7 @@
 			<input class="is-hidden recording-card-selector" type="checkbox" id="{{id}}" value="{{id}}" />
 			<div class="card recording is-flex is-flex-direction-column is-clickable">
 				<div class="card-image">
-					<figure class="image is-3by1 is-skeleton">
+					<figure class="image is-3by1">
 						<img src="{{poster}}" alt="Placeholder image" />
 					</figure>
 				</div>
@@ -530,17 +540,55 @@
       		<div class="icon"><i class="fa fa-video-camera"></i></div>
 					<h3 class="rec-title subtitle block">{{title}}</h3>
 					<div class="tags">
+            {{#if size}}
 						<span class="size tag"><span class="icon"><i class="fa fa-cube"></i></span><span>{{size}}</span></span>
+            {{/if}}
 						<span class="time tag"><span class="icon"><i class="fa fa-clock-o"></i></span><span>{{time}}</span></span>
 						<span class="dimension tag"><span class="icon"><i class="fa fa-arrows-alt"></i></span><span>{{dimension}}</span></span>
 						<span class="duration tag"><span class="icon"><i class="fa fa-play-circle"></i></span><span>{{durationAsTime}}</span></span>
 					</div>
+          {{#if isNew}}
+          <div class="new-tag"></div>
+          {{/if}}
 				</div>
 				<div class="card-footer">
 					<button class="del card-footer-item" data-id="{{id}}"><span class="icon"><i class="fa fa-trash"></i></span></button>
 					<button class="rename card-footer-item" data-id="{{id}}"><span class="icon"><i class="fa fa-pencil"></i></span></button>
 					<button class="preview card-footer-item" data-id="{{id}}"><span class="icon"><i class="fa fa-play"></i></span></button>
-					<a class="download card-footer-item" download="{{title}}" data-id="{{id}}"><span class="icon"><i class="fa fa-download"></i></span></a>
+					<a class="download card-footer-item" href="{{downloadURL}}" download="{{title}}" data-id="{{id}}"><span class="icon"><i class="fa fa-download"></i></span></a>
+				</div>
+			</div>
+		</label>
+	</script>
+
+  <script id="recording-card-template-without-image" type="text/x-handlebars-template">
+    <label class="column is-full-mobile is-half-tablet is-one-third-desktop recording-wrapper" for="{{id}}" data-id="{{id}}" />
+			<input class="is-hidden recording-card-selector" type="checkbox" id="{{id}}" value="{{id}}" />
+			<div class="card recording is-flex is-flex-direction-column is-clickable">
+        <div class="card-header">
+          <div class="card-header-title rec-title">{{title}}</div>
+          {{#unless isNew}}
+          <div class="card-header-icon"><span class="icon"><i class="fa fa-video-camera"></i></span></div>
+          {{/unless}}
+        </div>
+        <div class="card-content">
+					<div class="tags">
+            {{#if size}}
+            <span class="size tag"><span class="icon"><i class="fa fa-cube"></i></span><span>{{size}}</span></span>
+            {{/if}}
+						<span class="time tag"><span class="icon"><i class="fa fa-clock-o"></i></span><span>{{time}}</span></span>
+						<span class="dimension tag"><span class="icon"><i class="fa fa-arrows-alt"></i></span><span>{{dimension}}</span></span>
+						<span class="duration tag"><span class="icon"><i class="fa fa-play-circle"></i></span><span>{{durationAsTime}}</span></span>
+					</div>
+          {{#if isNew}}
+          <div class="new-tag"></div>
+          {{/if}}
+				</div>
+				<div class="card-footer">
+					<button class="del card-footer-item" data-id="{{id}}"><span class="icon"><i class="fa fa-trash"></i></span></button>
+					<button class="rename card-footer-item" data-id="{{id}}"><span class="icon"><i class="fa fa-pencil"></i></span></button>
+					<button class="preview card-footer-item" data-id="{{id}}"><span class="icon"><i class="fa fa-play"></i></span></button>
+					<a class="download card-footer-item" href="{{downloadURL}}" download="{{title}}" data-id="{{id}}"><span class="icon"><i class="fa fa-download"></i></span></a>
 				</div>
 			</div>
 		</label>

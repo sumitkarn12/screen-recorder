@@ -10,20 +10,23 @@ const cancelRecordingCardSelection = document.getElementById('cancel-recording-s
 const modal = document.querySelector('#playback-modal');
 const multiDeleteBtn = document.querySelector('#delete-multiple-button');
 const multiRenameBtn = document.querySelector('#rename-multiple-button');
+const recordingCardTypeEl = document.querySelector('#recording-card-type');
 const orderByEl = document.querySelector('#order-by-el');
 const isReversedEl = document.querySelector('#is-reversed-val');
 const template = Handlebars.compile(document.querySelector('#recording-card-template').innerHTML);
-const parser = new DOMParser();
-const VIEW = { isReversed: true, orderBy: "at" }
+const templateWithoutImage = Handlebars.compile(document.querySelector('#recording-card-template-without-image').innerHTML);
 
-alertify.defaults.glossary.title = "🖥️";
-alertify.defaults.notifier.closeButton = true;
-alertify.set("notifier", "position", "top-center");
-
+const VIEW = { isReversed: true, orderBy: "at", templateType: "with-image" }
+const APP_CONFIG_KEY = "config";
 const HISTORY_KEY = `RECORDINGS`;
 const VIDEO_EXT = `webm`;
 const DEF_OF_NEW_RECORDING = 5 * 60 * 1000; // Not recorded more than 5 mins ago 
 const APP_URL = location.hostname;
+const parser = new DOMParser();
+
+alertify.defaults.glossary.title = "🖥️";
+alertify.defaults.notifier.closeButton = true;
+alertify.set("notifier", "position", "top-center");
 
 let mediaRecorder, stream;
 let recordedChunks = [];
@@ -84,7 +87,7 @@ function saveRecording(mimeType) {
     }).then(a => {
       renderHistory();
       v.remove();
-      URL.revokeObjectURL( videoURL );
+      URL.revokeObjectURL(videoURL);
     });
     // Stop the media stream tracks
     stream.getTracks().forEach(track => track.stop());
@@ -98,10 +101,10 @@ function closeModal() {
   videoPlayback.pause();
 }
 
-function rename( keys, callback ) {
-  db.recordings.orderBy("id").filter(r => keys.includes(r.id)).toArray().then( recs => {
+function rename(keys, callback) {
+  db.recordings.orderBy("id").filter(r => keys.includes(r.id)).toArray().then(recs => {
     if (recs.length == 0) throw new Error("Nothing to be renamed");
-    alertify.prompt(`Enter new name`, (recs.length == 1)?recs[0].title.replace( "."+VIDEO_EXT, ""):"", async function (evt, p) {
+    alertify.prompt(`Enter new name`, (recs.length == 1) ? recs[0].title.replace("." + VIDEO_EXT, "") : "", async function (evt, p) {
       let renamedRecs = recs.map((r, i) => {
 
         // Check if input is a non-empty string
@@ -112,61 +115,56 @@ function rename( keys, callback ) {
         p = p.replace(/[^0-9a-zA-Z\-\._]/g, ' ');
         p = p.replace(/\s+/g, ' ').trim(); // Replaced consecutive spaces with one space
         p = p.substring(0, 128);
-        r.title = p + ((recs.length > 1)?` - ${i}`:"")+`.${VIDEO_EXT}`;
+        r.title = p + ((recs.length > 1) ? ` - ${i}` : "") + `.${VIDEO_EXT}`;
         return r;
       });
       db.recordings.bulkPut(renamedRecs).then(r => {
         alertify.success(`Renamed ${renamedRecs.length} recording${(renamedRecs.length > 1) ? "s" : ""}.`);
-        callback( renamedRecs );
+        callback(renamedRecs);
       });
     });
   });
 }
 
-function remove( keys, callback ) {
+function remove(keys, callback) {
   alertify.confirm(`Are your sure to delete ${keys.length} recording${(keys.length > 1) ? "s" : ""}?`, async function () {
-    db.recordings.bulkDelete( keys ).then(r => {
+    db.recordings.bulkDelete(keys).then(r => {
       alertify.success(`Deleted ${keys.length} recording${(keys.length > 1) ? "s" : ""}.`);
-      callback( keys );
+      callback(keys);
     });
   });
 }
 
 videoPlayback.addEventListener("resize", e => {
-  console.log("Video Dimensio", e.target.videoWidth, e.target.videoHeight);
   modal.querySelector(".modal-content").style.height = "auto";
   modal.querySelector(".modal-content").style.width = "auto";
-  if (e.target.videoWidth - e.target.videoHeight) {
-    modal.querySelector(".modal-content").style.height = "100%";
+  videoPlayback.style.height = "auto";
+  videoPlayback.style.width = "auto";
+  if ((e.target.videoWidth - e.target.videoHeight) > 0) {
+    videoPlayback.style.width = "90%";
+    modal.querySelector(".modal-content").style.width = "90%";
   } else {
-    modal.querySelector(".modal-content").style.height = "100%";
+    videoPlayback.style.height = "90%";
+    modal.querySelector(".modal-content").style.height = "90%";
   }
-  let isDirty = false;
-  if (!currentRecording.dimension) {
-    currentRecording.dimension = `${e.target.videoWidth}x${e.target.videoHeight}`
-    isDirty = true;
-  }
-  if (!currentRecording.duration) {
-    currentRecording.duration = Math.round(e.target.duration);
-    isDirty = true;
-  }
-  if (isDirty)
-    db.recordings.put(currentRecording).then(r => {
-      console.log(r, "Record updated")
-    });
-})
+});
 
-orderByEl.addEventListener( "change", el => {
+recordingCardTypeEl.addEventListener("change", el => {
+  VIEW.templateType = el.target.value;
+  renderHistory();
+});
+
+orderByEl.addEventListener("change", el => {
   VIEW.orderBy = el.target.value;
   renderHistory();
 });
 
-isReversedEl.addEventListener( "change", el => {
+isReversedEl.addEventListener("change", el => {
   VIEW.isReversed = el.target.checked;
   renderHistory();
 });
 
-cancelRecordingCardSelection.addEventListener("click", e=> {
+cancelRecordingCardSelection.addEventListener("click", e => {
   document.querySelectorAll(".recording-card-selector").forEach(el => {
     el.checked = false;
   });
@@ -182,19 +180,21 @@ multiRenameBtn.addEventListener("click", async e => {
   rename(keys, recs => {
     recs.forEach(r => {
       const title = document.querySelector(`label[data-id='${r.id}'] .rec-title`);
+      const download = document.querySelector(`label[data-id='${r.id}'] .download`);
       title.textContent = r.title;
+      download.setAttribute("download", r.title);
     });
     cancelRecordingCardSelection.click();
   });
 });
 
 multiDeleteBtn.addEventListener("click", async e => {
-  let selectedContent = document.querySelectorAll("input[type=checkbox]:checked");
+  let selectedContent = document.querySelectorAll("#recordings input[type=checkbox]:checked");
   let keys = Array.from(selectedContent).map(c => Number(c.value));
   if (keys.length == 0) return;
 
   remove(keys, ids => {
-    ids.forEach( k => {
+    ids.forEach(k => {
       const card = document.querySelector(`label[data-id='${k}']`);
       URL.revokeObjectURL(card.querySelector(".download").href);
       card.style.transform = "scale(0)";
@@ -228,8 +228,8 @@ startBtn.addEventListener('click', async () => {
     timer.start();
     timer.el.style.display = "block";
   } catch (err) {
-    if (err.message.toLowerCase() != "permission denied by user" ) {
-      console.error( err )
+    if (err.message.toLowerCase() != "permission denied by user") {
+      console.error(err)
       alertify.error(`Couldn't start recording.\n${err.message}`, 10);
     }
     updateControls(1, 0, 0, 0);
@@ -261,12 +261,12 @@ stopBtn.addEventListener('click', () => {
 
 historyContainer.addEventListener("click", e => {
   let button = e.target.closest(".card-footer-item");
-  if ( !button ) return;
+  if (!button) return;
 
   if (button.classList.contains("del")) {
     videoPlayback.src = null;
     remove([Number(button.dataset.id)], keys => {
-      keys.forEach( k => {
+      keys.forEach(k => {
         const card = document.querySelector(`label[data-id='${k}']`);
         URL.revokeObjectURL(card.querySelector(".download").href);
         card.style.transform = "scale(0)";
@@ -275,9 +275,11 @@ historyContainer.addEventListener("click", e => {
     });
   } else if (button.classList.contains("rename")) {
     rename([Number(button.dataset.id)], recs => {
-      recs.forEach( r => {
+      recs.forEach(r => {
         const title = document.querySelector(`label[data-id='${r.id}'] .rec-title`);
+        const download = document.querySelector(`label[data-id='${r.id}'] .download`);
         title.textContent = r.title;
+        download.setAttribute( "download", r.title );
       });
     });
   } else if (button.classList.contains("preview")) {
@@ -293,7 +295,7 @@ document.addEventListener("keydown", e => {
   // List of tag names to exclude
   const excludedTags = ['INPUT', 'TEXTAREA', 'SELECT'];
   // If the event originated from an excluded input field, do nothing.
-  if (excludedTags.includes(e.target.tagName))  return;
+  if (excludedTags.includes(e.target.tagName)) return;
 
   const shortcuts = [
     { keys: '?', description: 'Show all keyboard shortcuts (this popup)' },
@@ -310,13 +312,13 @@ document.addEventListener("keydown", e => {
   const pressedKey = String(e.key).toLowerCase();
   const mediaState = mediaRecorder?.state || "inactive";
 
-  console.log( pressedKey, mediaState );
+  console.log(pressedKey, mediaState);
 
-  if ( pressedKey === '?' ) {
+  if (pressedKey === '?') {
     document.getElementById('shortcuts-modal').classList.add("is-active");
-  } else  if (pressedKey == 's' && mediaState == "inactive") { startBtn.click(); }
+  } else if (pressedKey == 's' && mediaState == "inactive") { startBtn.click(); }
   else if (pressedKey == 's' && mediaState == "recording") { stopBtn.click(); }
-  else if (pressedKey =="p" && mediaState == "recording") { pauseBtn.click(); }
+  else if (pressedKey == "p" && mediaState == "recording") { pauseBtn.click(); }
   else if (pressedKey == "r" && mediaState == "paused") { resumeBtn.click(); }
   else if ((e.ctrlKey || e.metaKey) && pressedKey == 'a') {
     document.querySelectorAll(".recording-card-selector").forEach(el => {
@@ -331,41 +333,34 @@ document.addEventListener("keydown", e => {
 });
 
 function renderHistory() {
-  let current_date = null;
+  let recording_header_text = null, innerHTML = [];
   historyContainer.querySelectorAll(".column").forEach(l => l.remove());
 
-  let localDB = db.recordings.orderBy( VIEW.orderBy );
-  localDB = VIEW.isReversed?localDB.reverse():localDB;
+  let localDB = db.recordings.orderBy(VIEW.orderBy);
+  localDB = VIEW.isReversed ? localDB.reverse() : localDB;
+
+  localStorage.setItem(APP_CONFIG_KEY, JSON.stringify(VIEW));
 
   localDB.each(data => {
-    data.poster = `https://picsum.photos/seed/${data.id}/900/300.webp`;
-    data.size = (data.blob.size / (1024 * 1024)).toFixed(2) + "MB";
+    data.poster = `https://picsum.photos/seed/${data.id}/450/150.webp`;
+    data.downloadURL = URL.createObjectURL(data.blob);
+    data.size = data.size?(data.size / (1024 * 1024)).toFixed(2) + " MB":null;
     data.time = data.at.toLocaleTimeString(navigator.language);
     let d = new Date(data.duration * 1000);
     data.durationAsTime = d.toJSON().substring(11, 19)
-    if (current_date != data.at.toDateString()) {
-      current_date = data.at.toDateString();
-      let li = createElement("div", ["category", "column", "is-full"], `<span class="icon"><i class="fa fa-calendar"></i></span> <span>${current_date}</span>`);
-      historyContainer.appendChild(li);
+    let htv = ( VIEW.orderBy == "at" )?data.at.toDateString(): data[ VIEW.orderBy ];
+    if (recording_header_text != htv && (VIEW.orderBy == "at" || VIEW.orderBy == "dimension") ) {
+      recording_header_text = htv;
+      innerHTML.push( `<div class="category column is-full"><span class="icon"><i class="fa fa-calendar"></i></span> <span>${recording_header_text}</span></div>` );
     }
 
-    let node = parser.parseFromString(template(data), "text/html");
-    node = node.querySelector("label");
-    node.querySelector(".download").href = URL.createObjectURL(data.blob);
-
-    if ((Date.now() - data.at.getTime()) < DEF_OF_NEW_RECORDING) {
-      let newTag = createElement("div", ["new-tag"], null);
-      node.querySelector(".card-content").appendChild(newTag);
-    }
-
-    node.querySelector("img").onload = (ev) => {
-      ev.target.parentNode.classList.remove("is-skeleton");
-    }
-
-    historyContainer.appendChild(node);
+    data.isNew = ((Date.now() - data.at.getTime()) < DEF_OF_NEW_RECORDING)
+    let tempText = (VIEW.templateType == "with-image") ? template(data) : templateWithoutImage(data);
+    innerHTML.push( tempText );
+  }).then( () => {
+    historyContainer.innerHTML = innerHTML.join("");
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   });
-
-  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 const timer = {
@@ -384,7 +379,17 @@ const timer = {
   }
 }
 
-renderHistory();
+let config = JSON.parse(localStorage.getItem(APP_CONFIG_KEY));
+Object.keys(config).forEach(key => {
+  if (key == "isReversed") {
+    isReversedEl.checked = config[key];
+  } else if (key == "templateType") {
+    recordingCardTypeEl.value = config[key];
+  } else if (key == "orderBy") {
+    orderByEl.value = config[key];
+  }
+  VIEW[key] = config[key];
+});
 
 if (!navigator.mediaDevices.getDisplayMedia) {
   document.querySelector("#main-content").style.display = "none";
@@ -395,13 +400,13 @@ if (!navigator.mediaDevices.getDisplayMedia) {
   setInterval(async () => {
     msg.style.display = "block";
     let m = await estimateStorage()
-    if ( msg.textContent != m ) {
+    if (msg.textContent != m) {
       // alertify.message( `Available storage updated.` );
       msg.textContent = m;
     }
     // console.log( "Available storage checked!" );
-  }, 10*1000);
-  estimateStorage().then( m => {
+  }, 10 * 1000);
+  estimateStorage().then(m => {
     msg.style.display = "block";
     msg.textContent = m;
   });
@@ -410,3 +415,11 @@ if (!navigator.mediaDevices.getDisplayMedia) {
 if (typeof navigator.serviceWorker !== 'undefined') {
   navigator.serviceWorker.register('sw.js')
 }
+
+document.addEventListener( "DOMContentLoaded", renderHistory );
+
+const pageHitCountURL = `https://pagehit.deno.dev/count/${location.hostname}`
+console.log( pageHitCountURL )
+fetch( pageHitCountURL, {method: "POST"}).then( res => res.json() ).then( res => {
+  document.querySelector("#page-hit-count").textContent = res.count;
+});

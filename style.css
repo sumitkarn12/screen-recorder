@@ -1,8 +1,23 @@
 html { scroll-behavior: smooth; }
 #footer-spacer { margin-bottom: 120px; }
+
+.button[accesskey]::after {
+  content: attr(accesskey);
+  color: #000;
+  background-color: rgb(206, 206, 206);
+  padding: 0 6px;
+  margin-left: 12px;
+  border-radius: 4px;
+}
+
 #view-options { gap: 12px;}
 #is-reversed-el #is-reversed-val { display: none;}
-#is-reversed-el #is-reversed-val:checked + label { background-color: var(--bulma-primary); }
+#is-reversed-el #is-reversed-val + label::before { font-family: FontAwesome; margin-right: 6px; }
+#is-reversed-el #is-reversed-val + label::before { content: "\f160"; }
+#is-reversed-el #is-reversed-val:checked + label::before { content: "\f161"; }
+#is-reversed-el #is-reversed-val:checked + label {
+  background-color: var(--bulma-primary);
+}
 
 .b-card {
   border: 1px solid #fff;
@@ -25,7 +40,7 @@ html { scroll-behavior: smooth; }
 #main-content:has(.recording-card-selector:checked) .controls .multi-action { transform: translateY(0%); }
 #main-content:has(.recording-card-selector:checked) .card-footer { filter: blur(3px); pointer-events: none; }
 
-#video-playback { max-height: 80vh; max-width: 100%; margin: 0 auto; }
+/* #video-playback { max-height: 80vh; max-width: 100%; margin: 0 auto; } */
 #playback-modal .modal-close { background-color: var(--bulma-primary); z-index: 1; }
 
 .new-tag::after {
