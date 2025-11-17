@@ -379,7 +379,7 @@ const timer = {
   }
 }
 
-let config = JSON.parse(localStorage.getItem(APP_CONFIG_KEY));
+let config = JSON.parse(localStorage.getItem(APP_CONFIG_KEY)) || VIEW;
 Object.keys(config).forEach(key => {
   if (key == "isReversed") {
     isReversedEl.checked = config[key];
